@@ -3,37 +3,50 @@ from torch.autograd import Variable
 import torch.nn as nn
 import torch.nn.functional as F
 
-class Net:
+class Net(torch.nn.Module):
 
-    def __init__(self):
-        super(Net, self).__init__()
-        # 1 input image channel, 6 output channels, 5x5 square convolution
-        # kernel
-        self.conv1 = nn.Conv2d(3, 64, 3)
-        self.conv2 = nn.Conv2d(6, 16, 5)
-        # an affine operation: y = Wx + b
-        self.fc1 = nn.Linear(16 * 5 * 5, 120)
-        self.fc2 = nn.Linear(120, 84)
-        self.fc3 = nn.Linear(84, 10)
-
-    def forward(self, x):
-        # Max pooling over a (2, 2) window
-        x = F.max_pool2d(F.relu(self.conv1(x)), (2, 2))
-        # If the size is a square you can only specify a single number
-        x = F.max_pool2d(F.relu(self.conv2(x)), 2)
-        x = x.view(-1, self.num_flat_features(x))
-        x = F.relu(self.fc1(x))
-        x = F.relu(self.fc2(x))
-        x = self.fc3(x)
-        return x
-
-    def num_flat_features(self, x):
-        size = x.size()[1:]  # all dimensions except the batch dimension
-        num_features = 1
-        for s in size:
-            num_features *= s
-        return num_features
+	def __init__(self):
+		super(Net, self).__init__()
+		self.conv1 = nn.Conv2d(3, 64, 3) # Layer 1
+		self.conv2 = nn.Conv2d(64, 64, 3) # Layer 2
+		self.pool1 = nn.MaxPool2d(2)
+		self.conv3 = nn.Conv2d(64, 128, 3)
+		self.conv4 = nn.Conv2d(128, 128, 3)
+		self.pool2 = nn.MaxPool2d(2)
+		self.conv5 = nn.Conv2d(128, 256, 3)
+		self.conv6 = nn.Conv2d(256, 256, 3)
+		self.conv7 = nn.Conv2d(256, 256, 3)
+		self.pool3 = nn.MaxPool2d(2)
+		self.conv8 = nn.Conv2d(256, 512, 3)
+		self.conv9 = nn.Conv2d(512, 512, 3)
+		self.conv10 = nn.Conv2d(512, 512, 3)
+		self.pool4 = nn.MaxPool2d(2)
+		self.conv11 = nn.Conv2d(512, 512, 3)
+		self.conv12 = nn.Conv2d(512, 512, 3)
+		self.conv13 = nn.Conv2d(512, 512, 3)
+		self.pool5 = nn.MaxPool2d(2)
+		self.fc1 = nn.Linear(7*7*512, 4096)
+		self.fc2 = nn.Linear(4096, 4096)
 
 
-net = Net()
-print(net)
+	def forward_once(self, x):
+		"""
+		Takes as input a 3*224*224 image, returns an embedding of length 4096.
+		"""
+
+		x = self.pool1(F.relu(self.conv2(F.relu(self.conv1(x)))))
+		x = self.pool2(F.relu(self.conv4(F.relu(self.conv3(x)))))
+		x = self.pool3(F.relu(self.conv7(F.relu(self.conv6(F.relu(self.conv5(x)))))))
+		x = self.pool4(F.relu(self.conv10(F.relu(self.conv9(F.relu(self.conv8(x)))))))
+		x = self.pool5(F.relu(self.conv13(F.relu(self.conv12(F.relu(self.conv11(x)))))))
+		x = F.relu(self.fc2(F.relu(self.fc1(x))))
+
+		return x
+
+	def forward(self, image1, image2):
+		"""
+		Returns pair of embeddings for pair of training images.
+		"""
+		output1 = self.forward_once(image1)
+		output2 = self.forward_once(image2)
+		return output1, output2
