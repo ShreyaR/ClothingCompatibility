@@ -21,7 +21,7 @@ class ManageTrie:
 			current_node = current_node.children[c]
 			count += 1
 			if count==len(s):
-				current_node.children = None		
+				current_node.children["END"] = None		
 
 	def lookup_in_trie(self, s):
 		current_node = self.root
@@ -33,7 +33,7 @@ class ManageTrie:
 			current_node = current_node.children[c]
 		
 		#return found
-		return current_node.children==None		
+		return ("END" in current_node.children.keys())		
 		
 """with open('test_ids.txt') as f:
 	test_ids = f.readline()
