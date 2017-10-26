@@ -5,7 +5,7 @@ import torch.nn.functional as F
 
 class Net(torch.nn.Module):
 
-	def __init__(self):
+	def __init__(self, embeddingSize):
 		super(Net, self).__init__()
 		self.conv1 = nn.Conv2d(3, 64, 3) # Layer 1
 		self.conv2 = nn.Conv2d(64, 64, 3) # Layer 2
@@ -27,7 +27,7 @@ class Net(torch.nn.Module):
 		self.pool5 = nn.MaxPool2d(2)
 		self.fc1 = nn.Linear(7*7*512, 4096)
 		self.fc2 = nn.Linear(4096, 4096)
-
+		self.fc3 = nn.Linear(4096, embeddingSize)
 
 	def forward_once(self, x):
 		"""
@@ -39,7 +39,7 @@ class Net(torch.nn.Module):
 		x = self.pool3(F.relu(self.conv7(F.relu(self.conv6(F.relu(self.conv5(x)))))))
 		x = self.pool4(F.relu(self.conv10(F.relu(self.conv9(F.relu(self.conv8(x)))))))
 		x = self.pool5(F.relu(self.conv13(F.relu(self.conv12(F.relu(self.conv11(x)))))))
-		x = F.relu(self.fc2(F.relu(self.fc1(x))))
+		x = F.relu(self.fc3(F.relu(self.fc2(F.relu(self.fc1(x))))))
 
 		return x
 
