@@ -1,6 +1,6 @@
 net = SiameseNetwork().cuda()
 criterion = ContrastiveLoss()
-optimizer = optim.Adam(net.parameters(),lr = 0.0005 )
+optimizer = optim.Adam(net.parameters(),lr = 0.0005)
 
 counter = []
 loss_history = [] 
