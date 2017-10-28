@@ -2,6 +2,7 @@ from torch import optim
 from vgg import Net
 from constrastive_loss import ContrastiveLoss
 from dataset_loading import SiameseNetworkDataset
+from torch.autograd import Variable
 
 net = SiameseNetwork().cuda()
 criterion = ContrastiveLoss()
@@ -11,14 +12,15 @@ counter = []
 loss_history = [] 
 iteration_number= 0
 
-
-
 for epoch in range(0,Config.train_number_epochs):
 
-    for data in train_dataloader:
-        img0, img1 , label = data
-        img0, img1 , label = Variable(img0).cuda(), Variable(img1).cuda() , Variable(label).cuda()
-        output1,output2 = net(img0,img1)
+    train_dataloader = SiameseNetworkDataset("/data/srajpal2/AmazonDataset/transformed_train.txt")
+    for im1, im2, label in train_dataloader.__getitem__():
+
+        im1, im2 , label = Variable(im1).cuda(), Variable(im2).cuda() , Variable(label).cuda()
+        
+        #Pre-trained net
+        output1,output2 = net(im1,im2)
         optimizer.zero_grad()
         loss_contrastive = criterion(output1,output2,label)
         loss_contrastive.backward()
