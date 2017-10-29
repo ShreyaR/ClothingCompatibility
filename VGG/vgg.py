@@ -2,15 +2,15 @@ import torch
 from torch.autograd import Variable
 import torch.nn as nn
 import torch.nn.functional as F
-from torch.models import vgg16
+from torchvision.models import vgg16
 
 class Net(torch.nn.Module):
 
 	def __init__(self, embeddingSize):
 		super(Net, self).__init__()
 		self.vgg16 = vgg16(pretrained=True)
-		self.vgg16.classifier = nn.Sequential(*(self.vgg.classifier[i] for i in range(6)))
-		self.lastLayer = nn.Linear(4096, embeddingSize)
+		self.vgg16.classifier = nn.Sequential(*(self.vgg16.classifier[i] for i in range(6)))
+		self.vgg16.classifier.add_module(nn.Linear(4096, embeddingSize))
 
 		# self.conv1 = nn.Conv2d(3, 64, 3) # Layer 1
 		# self.conv2 = nn.Conv2d(64, 64, 3) # Layer 2
