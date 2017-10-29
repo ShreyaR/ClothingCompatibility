@@ -10,7 +10,7 @@ class Net(torch.nn.Module):
 		super(Net, self).__init__()
 		self.vgg16 = vgg16(pretrained=True)
 		self.vgg16.classifier = nn.Sequential(*(self.vgg16.classifier[i] for i in range(6)))
-		self.vgg16.classifier.add_module(nn.Linear(4096, embeddingSize))
+		self.vgg16.classifier.add_module('6', nn.Linear(4096, embeddingSize))
 
 		# self.conv1 = nn.Conv2d(3, 64, 3) # Layer 1
 		# self.conv2 = nn.Conv2d(64, 64, 3) # Layer 2
@@ -46,7 +46,7 @@ class Net(torch.nn.Module):
 		# x = self.pool5(F.relu(self.conv13(F.relu(self.conv12(F.relu(self.conv11(x)))))))
 		# x = F.relu(self.fc3(F.relu(self.fc2(F.relu(self.fc1(x))))))
 
-		x = self.lastLayer(self.vgg16(x))
+		x = self.vgg16(x)
 
 		return x
 
