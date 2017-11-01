@@ -13,7 +13,15 @@ for line in infile:
 	asin_lookup.add_to_trie(info["asin"])
 	category_map[info["asin"]] = info["category"]
 
+infile.close()
+infile = open("/data/srajpal2/AmazonDataset/meta_tbs.json")
+
+count = 0
+
 for line in infile:
+	count += 1
+	if count%1000==0:
+		print count/596018.0
 	info = json.loads(line.rstrip())
 	related = info["related"]
 	own_cat = info["category"]
@@ -24,7 +32,6 @@ for line in infile:
 	if 'similar' in related.keys():
 		for asin in related['similar']:
 			if asin_lookup.lookup_in_trie(asin):
-				print cat, own_cat
 				cat = category_map[asin]
 				if cat==own_cat:
 					new_similar.append(asin)
@@ -39,9 +46,6 @@ for line in infile:
 				else:
 					new_compatible.append(asin)
 
-	break
-
 	related = {"similar": new_similar, "compatible": new_compatible}
-
 	json.dump({"asin": info['asin'], "category":own_cat, "imUrl":info["imUrl"], "related":related}, outfile)
 	outfile.write('\n')
