@@ -17,12 +17,12 @@ class SiameseNetworkDataset:
                 im1 = Image.open(im1)
                 im2 = Image.open(im2)
 	
-		if min(im1.size) < 224:
-			im1 =  Resize.__call__(im1)
-		if min(im2.size) < 224:
-			im2 = Resize.__call__(im2)
-		
-		im1 = self.transforms.__call__(im1)
-		im2 = self.transforms.__call__(im2)
+				if min(im1.size) < 224:
+					im1 =  Resize.__call__(im1)
+				if min(im2.size) < 224:
+					im2 = Resize.__call__(im2)
+				
+				im1 = self.transforms.__call__(im1)
+				im2 = self.transforms.__call__(im2)
 
-     		yield im1, im2, int(label)   	
+     			yield im1, im2, int(label)   	
