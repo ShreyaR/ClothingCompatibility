@@ -16,8 +16,6 @@ class Net(torch.nn.Module):
 		self.top_shoe = nn.Linear(primaryEmbeddingSize, secEmbeddingSize)
 		self.bottom_shoe = nn.Linear(primaryEmbeddingSize, secEmbeddingSize)
 
-
-
 	def similarity_forward_once(self, x):
 		"""
 		Takes as input a 3*224*224 image, returns an embedding of length 4096.
