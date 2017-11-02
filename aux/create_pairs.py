@@ -17,6 +17,7 @@ with open("/data/srajpal2/AmazonDataset/updated_categories_meta_tbs.json") as f:
 		# asins.append(info["asin"])
 
 with open("/data/srajpal2/AmazonDataset/updated_categories_meta_tbs.json") as f:
+	count = 0
 	for line in f:
 		info = json.loads(line.rstrip())
 		related = info["related"]
@@ -99,6 +100,9 @@ with open("/data/srajpal2/AmazonDataset/updated_categories_meta_tbs.json") as f:
 					cat_pair = ''.join(sorted([cat1, cat2]))
 					outfile.write('C' + ' ' + img1 + ' ' + img2 + ' ' + '1' + ' ' + cat_pair + '\n')
 
+		count += 1
+		if count==0:
+			break
 
 
 
