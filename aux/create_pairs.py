@@ -1,108 +1,94 @@
 import json
 from random import choice
 
-outfile = open('/data/srajpal2/AmazonDataset/pairs.txt', 'w')
-
-category_map = {}
-url_map = {}
-inverse_category_maps = {'t':[], 'b':[], 's':[]}
+class pair_creation:
 
 
-with open("/data/srajpal2/AmazonDataset/updated_categories_meta_tbs.json") as f:
-	for line in f:
-		info = json.loads(line.rstrip())
-		category_map[info["asin"]] = info["category"]
-		inverse_category_maps[info["category"]].append(info["asin"]) 
-		url_map[info["asin"]] = info["url"]
-		# asins.append(info["asin"])
+	def __init__(self):
 
-with open("/data/srajpal2/AmazonDataset/updated_categories_meta_tbs.json") as f:
-	count = 0
-	for line in f:
-		info = json.loads(line.rstrip())
-		related = info["related"]
-		img1 = info["imUrl"]
-		cat1 = info["category"]
+		self.outfile = open('/data/srajpal2/AmazonDataset/pairs.txt', 'w')
+		self.category_map = {}
+		self.url_map = {}
+		self.inverse_category_maps = {'t':[], 'b':[], 's':[]}
+		self.initial_data_pass
 
-		for i in related['compatible']:
+	def initial_data_pass(self):
 
+		with open("/data/srajpal2/AmazonDataset/updated_categories_meta_tbs.json") as f:
+			for line in f:
+				info = json.loads(line.rstrip())
+				self.category_map[info["asin"]] = info["category"]
+				self.inverse_category_maps[info["category"]].append(info["asin"]) 
+				self.url_map[info["asin"]] = info["url"]
+
+	def create_pairs(self):
+
+		with open("/data/srajpal2/AmazonDataset/updated_categories_meta_tbs.json") as f:
+			count = 0
+			for line in f:
+				info = json.loads(line.rstrip())
+				asin, img, related, cat = info["asin"], info["imUrl"], info["related"], info["category"]
+				self.createPositiveNegativeExamples(asin, img, related, cat)
+				count += 1
+				if count==5:
+					break
+
+	def createPositiveNegativeExamples(self, asin, img, related, category):
+		
+		for asin2 in related['compatible']:
 			# Add 1 positive compatibility example
-			img2 = url_map[i]
-			cat2 = category_map[i]
+			img2 = url_map[asin2]
+			cat2 = category_map[asin2]
 			cat_pair = ''.join(sorted([cat1, cat2]))
-			outfile.write('C' + ' ' + img1 + ' ' + img2 + ' ' + '0' + ' ' + cat_pair + '\n')
+			outfile.write('C' + ' ' + img + ' ' + img2 + ' ' + '0' + ' ' + cat_pair + '\n')
 
-			# Find 10 negative compatibility examples
-			for c in inverse_category_maps.keys():
-				if c==cat1:
-					continue
-				for j in choice(len(inverse_category_maps[c]), 5):
-
-					asin2 = category_map[j]
-					if asin2 in related['compatible']:
-						continue
-
-					cat2 = category_map[asin2]
-					img2 = url_map[asin2]
-					cat_pair = ''.join(sorted([cat1, cat2]))
-					outfile.write('C' + ' ' + img1 + ' ' + img2 + ' ' + '1' + ' ' + cat_pair + '\n')
-
-		if len(related['compatible'])==0:
-			for c in inverse_category_maps.keys():
-				if c==cat1:
-					continue
-				for j in choice(len(inverse_category_maps[c]), 5):
-
-					asin2 = category_map[j]
-					if asin2 in related['compatible']:
-						continue
-
-					cat2 = category_map[asin2]
-					img2 = url_map[asin2]
-					cat_pair = ''.join(sorted([cat1, cat2]))
-					outfile.write('C' + ' ' + img1 + ' ' + img2 + ' ' + '1' + ' ' + cat_pair + '\n')
-
-		for i in related['similar']:
-
-			# Add 1 positive compatibility example
-			img2 = url_map[i]
-			cat2 = category_map[i]
+		for asin2 in related['similar']:
+			# Add 1 positive similarity example
+			img2 = url_map[asin2]
+			cat2 = category_map[asin2]
 			cat_pair = ''.join(sorted([cat1, cat2]))
-			outfile.write('C' + ' ' + img1 + ' ' + img2 + ' ' + '0' + ' ' + cat_pair + '\n')
+			outfile.write('S' + ' ' + img1 + ' ' + img2 + ' ' + '0' + '\n')
 
-			# Find 10 negative compatibility examples
-			for c in inverse_category_maps.keys():
-				if c!=cat1:
-					continue
-				for j in choice(len(inverse_category_maps[c]), 5):
+		negative_cat1, negative_cat2 = [x for x in ['t','b','s'] if x!=category]
+		negative_compatible_cat1 = self.sampleChoice(len(self.inverse_category_maps[negative_cat1]), 5*max(1, len(related['compatible'])), set(related['compatible']))
+		negative_compatible_cat2 = self.sampleChoice(len(self.inverse_category_maps[negative_cat2]), 5*max(1, len(related['compatible'])), set(related['compatible']))
+		negative_similar = self.sampleChoice(len(self.inverse_category_maps[category]), 10*max(1, len(related['similar'])), set(related['similar']))
 
-					asin2 = category_map[j]
-					if asin2 in related['similar']:
-						continue
+		# Incompatible clothes from different categories to query category
+		negative_catpair1 = ''.join(sorted([negative_cat1, category]))
+		negative_catpair2 = ''.join(sorted([negative_cat2, category]))
+		for i in negative_compatible_cat1:
+			asin2 = self.inverse_category_maps[negative_cat1][i]
+			img2 = url_map[asin2]
+			outfile.write('C' + ' ' + img + ' ' + img2 + ' ' + '1' + ' ' + negative_catpair1 + '\n')
+		for i in negative_compatible_cat2:
+			asin2 = self.inverse_category_maps[negative_cat1][i]
+			img2 = url_map[asin2]
+			outfile.write('C' + ' ' + img + ' ' + img2 + ' ' + '1' + ' ' + negative_catpair1 + '\n')
 
-					cat2 = category_map[asin2]
-					img2 = url_map[asin2]
-					cat_pair = ''.join(sorted([cat1, cat2]))
-					outfile.write('C' + ' ' + img1 + ' ' + img2 + ' ' + '1' + ' ' + cat_pair + '\n')
+		# Dissimilar clothes from the same category as the query category
+		for i in negative_similar:
+			asin2 = self.inverse_category_maps[category][i]
+			img2 = url_map[asin2]
+			outfile.write('S' + ' ' + img + ' ' + img2 + ' ' + '1' + '\n')
 
-		if len(related['similar'])==0:
-			for c in inverse_category_maps.keys():
-				if c!=cat1:
-					continue
-				for j in choice(len(inverse_category_maps[c]), 5):
+		return
 
-					asin2 = category_map[j]
-					if asin2 in related['similar']:
-						continue
 
-					cat2 = category_map[asin2]
-					img2 = url_map[asin2]
-					cat_pair = ''.join(sorted([cat1, cat2]))
-					outfile.write('C' + ' ' + img1 + ' ' + img2 + ' ' + '1' + ' ' + cat_pair + '\n')
+	def sampleChoice(self, n, k, collision_set):
 
-		count += 1
-		if count==0:
-			break
+		sampled_items = set()
+
+		for i in xrange(k):
+			while(True):
+				x = choice(range(n))
+				if x not in collision_set and x not in sampled_items:
+					sampled_items.add(x)
+					break
+
+		return list(sampled_items)
+
+
 
 
 
