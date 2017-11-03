@@ -3,10 +3,10 @@ from random import choice
 
 class pair_creation:
 
+	def __init__(self, type_of_data):
 
-	def __init__(self):
-
-		self.outfile = open('/data/srajpal2/AmazonDataset/pairs.txt', 'w')
+		self.type_of_data = type_of_data
+		self.outfile = open('/data/srajpal2/AmazonDataset/%s_pairs.txt' % (self.type_of_data), 'w')
 		self.category_map = {}
 		self.url_map = {}
 		self.inverse_category_maps = {'t':[], 'b':[], 's':[]}
@@ -14,7 +14,7 @@ class pair_creation:
 
 	def initial_data_pass(self):
 
-		with open("/data/srajpal2/AmazonDataset/updated_categories_meta_tbs.json") as f:
+		with open("/data/srajpal2/AmazonDataset/%s_images.json" % self.type_of_data) as f:
 			for line in f:
 				info = json.loads(line.rstrip())
 				self.category_map[info["asin"]] = info["category"]
@@ -23,7 +23,7 @@ class pair_creation:
 
 	def create_pairs(self):
 
-		with open("/data/srajpal2/AmazonDataset/updated_categories_meta_tbs.json") as f:
+		with open("/data/srajpal2/AmazonDataset/%s_images.json" % self.type_of_data) as f:
 			count = 0
 			for line in f:
 				info = json.loads(line.rstrip())
