@@ -5,10 +5,10 @@ import json
 class traintestval_split:
 
 	def __init__(self):
-		self.main = '/data/srajpal2/AmazonData/updated_categories_meta_tbs.json'
-		self.trainfile = '/data/srajpal2/AmazonData/training_images_intermediate.json'
-		self.testfile = '/data/srajpal2/AmazonData/testing_images_intermediate.json'
-		self.valfile = '/data/srajpal2/AmazonData/val_images_intermediate.json'
+		self.main = '/data/srajpal2/AmazonDataset/updated_categories_meta_tbs.json'
+		self.trainfile = '/data/srajpal2/AmazonDataset/training_images_intermediate.json'
+		self.testfile = '/data/srajpal2/AmazonDataset/testing_images_intermediate.json'
+		self.valfile = '/data/srajpal2/AmazonDataset/val_images_intermediate.json'
 		self.training_imgs = ManageTrie()
 		self.test_imgs = ManageTrie()
 		self.val_imgs = ManageTrie()
@@ -24,7 +24,7 @@ class traintestval_split:
 		with open(self.main) as f:
 			for line in f:
 				asin = json.loads(line.rstrip())['asin']
-				prob = uniform()
+				prob = uniform(0,1)
 				if 0<=prob<0.8:
 					self.training_imgs.add_to_trie(asin)
 					trainfile.write(line)
@@ -32,7 +32,7 @@ class traintestval_split:
 					self.test_imgs.add_to_trie(asin)
 					testfile.write(line)
 				else:
-					self.valfile.add_to_trie(asin)
+					self.val_imgs.add_to_trie(asin)
 					valfile.write(line)
 
 		trainfile.close()
@@ -42,9 +42,9 @@ class traintestval_split:
 		return
 
 	def remove_cross_category_pairs(self):
-		trainoutput = '/data/srajpal2/AmazonData/training_images.json'
-		testoutput = '/data/srajpal2/AmazonData/testing_images.json'
-		valoutput = '/data/srajpal2/AmazonData/val_images.json'
+		trainoutput = '/data/srajpal2/AmazonDataset/training_images.json'
+		testoutput = '/data/srajpal2/AmazonDataset/testing_images.json'
+		valoutput = '/data/srajpal2/AmazonDataset/val_images.json'
 
 		for trie, inputfile, outputfile in zip([self.training_imgs, self.test_imgs, self.val_imgs], [self.trainfile, self.testfile, self.valfile], [trainoutput, testoutput, valoutput]):
 			outfile = open(outputfile, 'a')
@@ -66,5 +66,5 @@ class traintestval_split:
 
 
 
-
+x = traintestval_split()
 
