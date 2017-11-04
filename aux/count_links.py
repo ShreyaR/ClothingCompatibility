@@ -7,7 +7,7 @@ all_links = 0
 # with open("/data/srajpal2/AmazonDataset/updated_categories_meta_tbs.json") as f:
 # with open("/data/srajpal2/AmazonDataset/val_images.json") as f:
 # with open("/data/srajpal2/AmazonDataset/testing_images.json") as f:
-with open("/data/srajpal2/AmazonDataset/training_images.json") as f:
+with open("/data/srajpal2/AmazonDataset/test_train.json") as f:
 	for line in f:
 		info = json.loads(line.rstrip())
 		compatibility_links += len(info["related"]["compatible"])
