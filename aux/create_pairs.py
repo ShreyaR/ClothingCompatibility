@@ -1,5 +1,6 @@
 import json
 from random import choice, uniform
+from time import time
 
 class pair_creation:
 
@@ -12,8 +13,14 @@ class pair_creation:
 		self.category_map = {}
 		self.url_map = {}
 		self.inverse_category_maps = {'t':[], 'b':[], 's':[]}
+		idp = time()
 		self.initial_data_pass()
+		final_idp = idp - time()
+		print "Final IDP", final_idp
+		cp = time()
 		self.create_pairs()
+		final_cp = time() - cp
+		print "Final CP", final_cp
 	
 	def initial_data_pass(self):
 
@@ -28,31 +35,43 @@ class pair_creation:
 
 		with open("/data/srajpal2/AmazonDataset/%s_images.json" % self.type_of_data) as f:
 			count = 0
+			sumt1, sumt2, sumt3, sumt4 = 0,0,0,0
 			for line in f:
 				info = json.loads(line.rstrip())
 				asin, img, related, cat = info["asin"], info["imUrl"], info["related"], info["category"]
-				self.createPositiveNegativeExamples(asin, img, related, cat)
+				t1, t2, t3, t4 = self.createPositiveNegativeExamples(asin, img, related, cat)
+				sumt1+=t1
+				sumt2+=t2
+				sumt3+=t3
+				sumt4+=t4
 				count += 1
 				# if count==1000:
 					# print count
-				if count==5:
+				if count==50:
+					print sumt1, sumt2, sumt3, sumt4
 					break
 
 	def createPositiveNegativeExamples(self, asin, img, related, category):
 		
+
+		t1 = time()
 		for asin2 in related['compatible']:
 			# Add 1 positive compatibility example
 			img2 = self.url_map[asin2]
 			cat2 = self.category_map[asin2]
 			cat_pair = ''.join(sorted([category, cat2]))
 			self.outfile.write('C' + ' ' + img + ' ' + img2 + ' ' + '0' + ' ' + cat_pair + '\n')
+		final_t1 = time() - t1
 
+		t2 = time()
 		for asin2 in related['similar']:
 			# Add 1 positive similarity example
 			img2 = self.url_map[asin2]
 			cat2 = self.category_map[asin2]
 			cat_pair = ''.join(sorted([category, cat2]))
 			self.outfile.write('S' + ' ' + img + ' ' + img2 + ' ' + '0' + '\n')
+		final_t2 = time() - t2
+
 
 		negative_cat1, negative_cat2 = [x for x in ['t','b','s'] if x!=category]
 		cointoss = uniform(0,1)
@@ -64,15 +83,14 @@ class pair_creation:
 			cat1_samples = self.compatibility_neg2pos*max(1, len(related['compatible'])) - cat2_samples
 
 
-
+		t3 = time()
 		negative_compatible_cat1 = self.sampleChoice(len(self.inverse_category_maps[negative_cat1]), cat1_samples, set(related['compatible']))
 		negative_compatible_cat2 = self.sampleChoice(len(self.inverse_category_maps[negative_cat2]), cat2_samples, set(related['compatible']))
 		negative_similar = self.sampleChoice(len(self.inverse_category_maps[category]), self.similarity_neg2pos*max(1, len(related['similar'])), set(related['similar']))
-
-		print "Here"
-		print asin, len(related['compatible']), len(negative_compatible_cat1), len(negative_compatible_cat2), len(related['similar']), len(negative_similar)
+		final_t3 = time() - t3
 
 		# Incompatible clothes from different categories to query category
+		t4 = time()
 		negative_catpair1 = ''.join(sorted([negative_cat1, category]))
 		negative_catpair2 = ''.join(sorted([negative_cat2, category]))
 		for i in negative_compatible_cat1:
@@ -89,8 +107,9 @@ class pair_creation:
 			asin2 = self.inverse_category_maps[category][i]
 			img2 = self.url_map[asin2]
 			self.outfile.write('S' + ' ' + img + ' ' + img2 + ' ' + '1' + '\n')
+		final_t4 = time() - t4
 
-		return
+		return final_t1, final_t2, final_t3, final_t4
 
 	def sampleChoice(self, n, k, collision_set):
 
