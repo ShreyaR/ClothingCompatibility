@@ -3,9 +3,10 @@ from random import choice
 
 class pair_creation:
 
-	def __init__(self, type_of_data, neg_to_pos):
+	def __init__(self, type_of_data, compatibility_neg2pos, similarity_neg2pos):
 	
-		self.neg_to_pos = neg_to_pos
+		self.compatibility_neg2pos = compatibility_neg2pos
+		self.similarity_neg2pos = similarity_neg2pos
 		self.type_of_data = type_of_data
 		self.outfile = open('/data/srajpal2/AmazonDataset/%s_pairs.txt' % (self.type_of_data), 'w')
 		self.category_map = {}
@@ -32,8 +33,10 @@ class pair_creation:
 				asin, img, related, cat = info["asin"], info["imUrl"], info["related"], info["category"]
 				self.createPositiveNegativeExamples(asin, img, related, cat)
 				count += 1
-				if count==1000:
-					print count
+				# if count==1000:
+					# print count
+				if count==5:
+					break
 
 	def createPositiveNegativeExamples(self, asin, img, related, category):
 		
@@ -52,9 +55,21 @@ class pair_creation:
 			self.outfile.write('S' + ' ' + img + ' ' + img2 + ' ' + '0' + '\n')
 
 		negative_cat1, negative_cat2 = [x for x in ['t','b','s'] if x!=category]
-		negative_compatible_cat1 = self.sampleChoice(len(self.inverse_category_maps[negative_cat1]), int(0.5*(self.neg_to_pos)*max(1, len(related['compatible']))), set(related['compatible']))
-		negative_compatible_cat2 = self.sampleChoice(len(self.inverse_category_maps[negative_cat2]), int(0.5*(self.neg_to_pos)*max(1, len(related['compatible']))), set(related['compatible']))
-		negative_similar = self.sampleChoice(len(self.inverse_category_maps[category]), self.neg_to_pos*max(1, len(related['similar'])), set(related['similar']))
+		cointoss = uniform(0,1)
+		if cointoss<0.5:
+			cat1_samples = self.compatibility_neg2pos*max(1, len(related['compatible']))/2
+			cat2_samples = self.compatibility_neg2pos*max(1, len(related['compatible'])) - cat1_samples
+		else:
+			cat2_samples = self.compatibility_neg2pos*max(1, len(related['compatible']))/2
+			cat1_samples = self.compatibility_neg2pos*max(1, len(related['compatible'])) - cat2_samples
+
+
+
+		negative_compatible_cat1 = self.sampleChoice(len(self.inverse_category_maps[negative_cat1]), cat1_samples, set(related['compatible']))
+		negative_compatible_cat2 = self.sampleChoice(len(self.inverse_category_maps[negative_cat2]), cat2_samples, set(related['compatible']))
+		negative_similar = self.sampleChoice(len(self.inverse_category_maps[category]), self.similarity_neg2pos*max(1, len(related['similar'])), set(related['similar']))
+
+		print asin, len(related['compatibility']), len(negative_compatible_cat1), len(negative_compatible_cat2), len(related['similarity']), len(negative_similar)
 
 		# Incompatible clothes from different categories to query category
 		negative_catpair1 = ''.join(sorted([negative_cat1, category]))
@@ -89,8 +104,8 @@ class pair_creation:
 
 		return list(sampled_items)
 print "Training Pairs"
-x1 = pair_creation('training', 10)
+x1 = pair_creation('training', 10, 10)
 print "Testing Pairs"
-x2 = pair_creation('testing', 2)
+x2 = pair_creation('testing', 1, 0)
 print "Validation Pairs"
-x3 = pair_creation('val', 2)
+x3 = pair_creation('val', 1, 0)
