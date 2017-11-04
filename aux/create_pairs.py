@@ -1,5 +1,5 @@
 import json
-from random import choice
+from random import choice, uniform
 
 class pair_creation:
 
@@ -69,7 +69,8 @@ class pair_creation:
 		negative_compatible_cat2 = self.sampleChoice(len(self.inverse_category_maps[negative_cat2]), cat2_samples, set(related['compatible']))
 		negative_similar = self.sampleChoice(len(self.inverse_category_maps[category]), self.similarity_neg2pos*max(1, len(related['similar'])), set(related['similar']))
 
-		print asin, len(related['compatibility']), len(negative_compatible_cat1), len(negative_compatible_cat2), len(related['similarity']), len(negative_similar)
+		print "Here"
+		print asin, len(related['compatible']), len(negative_compatible_cat1), len(negative_compatible_cat2), len(related['similar']), len(negative_similar)
 
 		# Incompatible clothes from different categories to query category
 		negative_catpair1 = ''.join(sorted([negative_cat1, category]))
