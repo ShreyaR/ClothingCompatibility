@@ -46,14 +46,13 @@ class pair_creation:
 			# Add 1 positive compatibility example
 			img2 = self.url_map[asin2]
 			cat2 = self.category_map[asin2]
-			cat_pair = ''.join(sorted([category, cat2]))
+			cat_pair = ''.join([category, cat2])
 			self.outfile.write('C' + ' ' + img + ' ' + img2 + ' ' + '0' + ' ' + cat_pair + '\n')
 
 		for asin2 in related['similar']:
 			# Add 1 positive similarity example
 			img2 = self.url_map[asin2]
 			cat2 = self.category_map[asin2]
-			cat_pair = ''.join(sorted([category, cat2]))
 			self.outfile.write('S' + ' ' + img + ' ' + img2 + ' ' + '0' + '\n')
 
 		negative_cat1, negative_cat2 = [x for x in ['t','b','s'] if x!=category]
@@ -71,8 +70,8 @@ class pair_creation:
 		negative_similar = choice(len(self.inverse_category_maps[category]), self.similarity_neg2pos*max(1, len(related['similar'])))
 
 		# Incompatible clothes from different categories to query category
-		negative_catpair1 = ''.join(sorted([negative_cat1, category]))
-		negative_catpair2 = ''.join(sorted([negative_cat2, category]))
+		negative_catpair1 = ''.join([category, negative_cat1])
+		negative_catpair2 = ''.join([category, negative_cat2])
 		for i in negative_compatible_cat1:
 			asin2 = self.inverse_category_maps[negative_cat1][i]
 			img2 = self.url_map[asin2]
