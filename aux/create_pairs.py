@@ -12,9 +12,6 @@ class pair_creation:
 		self.url_map = {}
 		self.inverse_category_maps = {'t':[], 'b':[], 's':[]}
 		self.initial_data_pass()
-		for k,v in self.inverse_category_maps.items():
-			print k, len(v)
-		
 		self.create_pairs()
 	
 	def initial_data_pass(self):
@@ -35,8 +32,8 @@ class pair_creation:
 				asin, img, related, cat = info["asin"], info["imUrl"], info["related"], info["category"]
 				self.createPositiveNegativeExamples(asin, img, related, cat)
 				count += 1
-				if count==5:
-					break
+				if count==1000:
+					print count
 
 	def createPositiveNegativeExamples(self, asin, img, related, category):
 		
@@ -63,14 +60,13 @@ class pair_creation:
 		negative_catpair1 = ''.join(sorted([negative_cat1, category]))
 		negative_catpair2 = ''.join(sorted([negative_cat2, category]))
 		for i in negative_compatible_cat1:
-			print negative_cat1, i
 			asin2 = self.inverse_category_maps[negative_cat1][i]
 			img2 = self.url_map[asin2]
 			self.outfile.write('C' + ' ' + img + ' ' + img2 + ' ' + '1' + ' ' + negative_catpair1 + '\n')
 		for i in negative_compatible_cat2:
-			asin2 = self.inverse_category_maps[negative_cat1][i]
+			asin2 = self.inverse_category_maps[negative_cat2][i]
 			img2 = self.url_map[asin2]
-			self.outfile.write('C' + ' ' + img + ' ' + img2 + ' ' + '1' + ' ' + negative_catpair1 + '\n')
+			self.outfile.write('C' + ' ' + img + ' ' + img2 + ' ' + '1' + ' ' + negative_catpair2 + '\n')
 
 		# Dissimilar clothes from the same category as the query category
 		for i in negative_similar:
@@ -92,11 +88,9 @@ class pair_creation:
 					break
 
 		return list(sampled_items)
-
+print "Training Pairs"
 x1 = pair_creation('training', 10)
+print "Testing Pairs"
 x2 = pair_creation('testing', 2)
+print "Validation Pairs"
 x3 = pair_creation('val', 2)
-
-
-
-
