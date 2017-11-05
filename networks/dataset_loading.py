@@ -19,9 +19,9 @@ class SiameseNetworkDataset:
 				im2 = Image.open(eg_info[2])
 	
 				if min(im1.size) < 224:
-					im1 =  Resize.__call__(im1)
+					im1 =  self.resize.__call__(im1)
 				if min(im2.size) < 224:
-					im2 = Resize.__call__(im2)
+					im2 = self.resize.__call__(im2)
 				
 				im1 = self.transforms.__call__(im1)
 				im2 = self.transforms.__call__(im2)

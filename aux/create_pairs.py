@@ -34,7 +34,7 @@ class pair_creation:
 			for line in f:
 				info = json.loads(line.rstrip())
 				asin, img, related, cat = info["asin"], info["imUrl"], info["related"], info["category"]
-				self.createPositiveNegativeExamples(asin, img, related, cat)
+				self.createPositiveNegativeExamples(asin, self.imgUrlTransform(img), related, cat)
 				count += 1
 				if count==1000:
 					print count, time()-init_time
@@ -44,14 +44,14 @@ class pair_creation:
 
 		for asin2 in related['compatible']:
 			# Add 1 positive compatibility example
-			img2 = self.url_map[asin2]
+			img2 = self.imgUrlTransform(self.url_map[asin2])
 			cat2 = self.category_map[asin2]
 			cat_pair = ''.join([category, cat2])
 			self.outfile.write('C' + ' ' + img + ' ' + img2 + ' ' + '0' + ' ' + cat_pair + '\n')
 
 		for asin2 in related['similar']:
 			# Add 1 positive similarity example
-			img2 = self.url_map[asin2]
+			img2 = self.imgUrlTransform(self.url_map[asin2])
 			cat2 = self.category_map[asin2]
 			self.outfile.write('S' + ' ' + img + ' ' + img2 + ' ' + '0' + '\n')
 
@@ -74,17 +74,17 @@ class pair_creation:
 		negative_catpair2 = ''.join([category, negative_cat2])
 		for i in negative_compatible_cat1:
 			asin2 = self.inverse_category_maps[negative_cat1][i]
-			img2 = self.url_map[asin2]
+			img2 = self.imgUrlTransform(self.url_map[asin2])
 			self.outfile.write('C' + ' ' + img + ' ' + img2 + ' ' + '1' + ' ' + negative_catpair1 + '\n')
 		for i in negative_compatible_cat2:
 			asin2 = self.inverse_category_maps[negative_cat2][i]
-			img2 = self.url_map[asin2]
+			img2 = self.imgUrlTransform(self.url_map[asin2])
 			self.outfile.write('C' + ' ' + img + ' ' + img2 + ' ' + '1' + ' ' + negative_catpair2 + '\n')
 
 		# Dissimilar clothes from the same category as the query category
 		for i in negative_similar:
 			asin2 = self.inverse_category_maps[category][i]
-			img2 = self.url_map[asin2]
+			img2 = self.imgUrlTransform(self.url_map[asin2])
 			self.outfile.write('S' + ' ' + img + ' ' + img2 + ' ' + '1' + '\n')
 
 		return
@@ -101,6 +101,14 @@ class pair_creation:
 					break
 
 		return list(sampled_items)
+
+
+	def imgUrlTransform(self, url):
+		url = url.split('/')
+		url[3] = url[3] + 'set'
+		return '/'.join(url)
+
+
 print "Training Pairs"
 x1 = pair_creation('training', 10, 10)
 print "\n\nTesting Pairs"
