@@ -26,4 +26,5 @@ class SiameseNetworkDataset:
 				im1 = self.transforms.__call__(im1)
 				im2 = self.transforms.__call__(im2)
 
-     			yield im1, im2, int(label)   	
+     			# yield im1, im2, int(label)   	
+     			yield [eg_info[0]] + [im1, im2] + eg_info[3:]
