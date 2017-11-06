@@ -59,7 +59,6 @@ class Net(torch.nn.Module):
 		x = self.bs_shoe(self.network(x))
 		return x
 
-
 	def compatibility_forward(self, image1, image2, category_pair):
 		catpair2net = {}
 		catpair2net['bt'] = (self.bt_forward_bottom, self.bt_forward_top)
