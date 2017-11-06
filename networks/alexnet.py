@@ -73,6 +73,8 @@ class Net(torch.nn.Module):
 		return output1, output2
 
 	def forward(self, objective, image1, image2, category_pair=None):
+		image1 = image1.unsqueeze(0)
+		image2 = image2.unsqueeze(0)
 		if objective=='S':
 			return self.similarity_forward(image1, image2)
 		else:

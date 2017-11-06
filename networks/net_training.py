@@ -1,7 +1,8 @@
+import torch
 from torch import optim
 # from vgg import Net
 from alexnet import Net
-from constrastive_loss import ContrastiveLoss
+from contrastive_loss import ContrastiveLoss
 from dataset_loading import SiameseNetworkDataset
 from torch.autograd import Variable
 import os
@@ -9,7 +10,7 @@ import os
 
 os.environ["CUDA_VISIBLE_DEVICES"]="0"
 # net = SiameseNetwork().cuda()
-net = Net().cuda()
+net = Net(256, 32).cuda()
 criterion = ContrastiveLoss()
 optimizer = optim.Adam(net.parameters(),lr = 0.0005)
 
@@ -22,18 +23,17 @@ train_number_epochs = 5
 
 for epoch in range(0,train_number_epochs):
     # train_dataloader = SiameseNetworkDataset("/data/srajpal2/AmazonDataset/transformed_train.txt")
-    train_dataloader = SiameseNetworkDataset("/data/srajpal2/AmazonDataset/training_pairs.txt")
+    train_dataloader = SiameseNetworkDataset("/data/srajpal2/AmazonDataset/training_pairs.txt", 227)
     i=0
     for example in train_dataloader.__getitem__():
-
         objective = example[0]
         im1 = example[1]
         im2 = example[2]
-        label = example[3]
+        label = torch.FloatTensor([float(example[3])])
 
         im1, im2 , label = Variable(im1).cuda(), Variable(im2).cuda() , Variable(label).cuda()
         
-        if len(example==5):
+        if len(example)==5:
             categorypair = example[5]
             output1,output2 = net(objective,im1,im2,label,categorypair)
         else:
