@@ -34,10 +34,10 @@ for epoch in range(0,train_number_epochs):
         im1, im2 , label = Variable(im1).cuda(), Variable(im2).cuda() , Variable(label).cuda()
         
         if len(example)==5:
-            categorypair = example[5]
-            output1,output2 = net(objective,im1,im2,label,categorypair)
+            categorypair = example[4]
+            output1,output2 = net(objective,im1,im2,categorypair)
         else:
-            output1,output2 = net(objective,im1,im2,label)
+            output1,output2 = net(objective,im1,im2)
 
         optimizer.zero_grad()
         loss_contrastive = criterion(output1,output2,label)
