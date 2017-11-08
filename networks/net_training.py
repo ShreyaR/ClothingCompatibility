@@ -3,7 +3,7 @@ from torch import optim
 # from vgg import Net
 from alexnet import Net
 from contrastive_loss import ContrastiveLoss
-from dataset_loading import SiameseNetworkDataset
+from minibatch_loading import SiameseNetworkDataset
 from torch.autograd import Variable
 import os
 
