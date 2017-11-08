@@ -2,6 +2,7 @@ from PIL import Image
 from torchvision.transforms import ToTensor, Normalize, Resize, RandomCrop, Compose
 from itertools import izip_longest
 import numpy as np
+from torch import cat
 
 class SiameseNetworkDataset:
 
@@ -19,10 +20,10 @@ class SiameseNetworkDataset:
 		with open(self.imageFile) as f:
 			# for next_n_lines in izip_longest(*[f] * self.minibatchSize):
 
-			compatibility_buffer = {x:[[],[]] for x in ['bt', 'tb', 'sb', 'bs', 'st', 'ts']}
-			compatibility_labels = {x:[] for x in ['bt', 'tb', 'sb', 'bs', 'st', 'ts']}
-			similarity_buffer = [[],[]]
-			similarity_labels = []
+			self.compatibility_buffer = {x:[[],[]] for x in ['bt', 'tb', 'sb', 'bs', 'st', 'ts']}
+			self.compatibility_labels = {x:[] for x in ['bt', 'tb', 'sb', 'bs', 'st', 'ts']}
+			self.similarity_buffer = [[],[]]
+			self.similarity_labels = []
 
 			for line in f:
 			
@@ -40,32 +41,36 @@ class SiameseNetworkDataset:
 				objective = eg_info[0]
 				if eg_info=='C':
 					category_pair = eg_info[4]
-					compatibility_buffer[category_pair][0].append(np.array(im1))
-					compatibility_buffer[category_pair][1].append(np.array(im2))
-					compatibility_labels[category_pair].append(eg_info[3])
+					self.compatibility_buffer[category_pair][0].append(im1)
+					self.compatibility_buffer[category_pair][1].append(im2)
+					self.compatibility_labels[category_pair].append(eg_info[3])
 
-					if len(compatibility_labels[category_pair])==self.minibatchSize:
-						im1Tensor = self.transforms.__call__(np.array(compatibility_buffer[category_pair][0]))
-						im2Tensor = self.transforms.__call__(np.array(compatibility_buffer[category_pair][1]))
-						labelTensor = self.totensor.__call__(np.array(compatibility_labels[category_pair]))
-						compatibility_buffer[category_pair][0] = []
-						compatibility_buffer[category_pair][1] = []
-						compatibility_labels[category_pair] = []
-						yield [objective, im1Tensor, im2Tensor, labelTensor, category_pair]
+					if len(self.compatibility_labels[category_pair])==self.minibatchSize:
+						eg = self.yieldFunction(objective, category_pair)
+						yield eg
+						# im1Tensor = self.transforms.__call__(np.array(self.compatibility_buffer[category_pair][0]))
+						# im2Tensor = self.transforms.__call__(np.array(self.compatibility_buffer[category_pair][1]))
+						# labelTensor = self.totensor.__call__(np.array(self.compatibility_labels[category_pair]))
+						# self.compatibility_buffer[category_pair][0] = []
+						# self.compatibility_buffer[category_pair][1] = []
+						# self.compatibility_labels[category_pair] = []
+						# yield [objective, im1Tensor, im2Tensor, labelTensor, category_pair]
 
 				else:
-					similarity_buffer[0].append(np.array(im1))
-					similarity_buffer[1].append(np.array(im2))
-					similarity_labels.append(eg_info[3])
+					self.similarity_buffer[0].append(im1)
+					self.similarity_buffer[1].append(im2)
+					self.similarity_labels.append(eg_info[3])
 
-					if len(similarity_labels)==self.minibatchSize:
-						im1Tensor = self.transforms.__call__(np.array(similarity_buffer[0]))
-						im2Tensor = self.transforms.__call__(np.array(similarity_buffer[1]))
-						labelTensor = self.totensor.__call__(np.array(similarity_labels))
-						similarity_buffer[0] = []
-						similarity_buffer[1] = []
-						similarity_labels = []
-						yield [objective, im1Tensor, im2Tensor, labelTensor]
+					if len(self.similarity_labels)==self.minibatchSize:
+						eg = self.yieldFunction(objective)
+						yield eg
+						# im1Tensor = self.transforms.__call__(np.array(self.similarity_buffer[0]))
+						# im2Tensor = self.transforms.__call__(np.array(self.similarity_buffer[1]))
+						# labelTensor = self.totensor.__call__(np.array(self.similarity_labels))
+						# self.similarity_buffer[0] = []
+						# self.similarity_buffer[1] = []
+						# self.similarity_labels = []
+						# yield [objective, im1Tensor, im2Tensor, labelTensor]
 
 				# im1 = self.transforms.__call__(im1)
 				# im2 = self.transforms.__call__(im2)
@@ -74,17 +79,40 @@ class SiameseNetworkDataset:
 	 			# yield [eg_info[0]] + [im1, im2] + eg_info[3:]
 
 
-	 		for category_pair in compatibility_buffer.keys():
-	 			if len(compatibility_labels[category_pair])==0:
+	 		for category_pair in self.compatibility_buffer.keys():
+	 			if len(self.compatibility_labels[category_pair])==0:
 	 				continue
-	 			im1Tensor = self.transforms.__call__(np.array(compatibility_buffer[category_pair][0]))
-				im2Tensor = self.transforms.__call__(np.array(compatibility_buffer[category_pair][1]))
-				labelTensor = self.totensor.__call__(np.array(compatibility_labels[category_pair]))
-				yield ['C', im1Tensor, im2Tensor, labelTensor, category_pair]
+	 			eg = self.yieldFunction(objective, category_pair)
+	 			yield eg
+	 			# im1Tensor = self.transforms.__call__(np.array(self.compatibility_buffer[category_pair][0]))
+				# im2Tensor = self.transforms.__call__(np.array(self.compatibility_buffer[category_pair][1]))
+				# labelTensor = self.totensor.__call__(np.array(self.compatibility_labels[category_pair]))
+				# yield ['C', im1Tensor, im2Tensor, labelTensor, category_pair]
 
-			if len(similarity_labels)>0:
-				im1Tensor = self.transforms.__call__(np.array(similarity_buffer[0]))
-				im2Tensor = self.transforms.__call__(np.array(similarity_buffer[1]))
-				labelTensor = self.totensor.__call__(np.array(similarity_labels))
-				yield ['S', im1Tensor, im2Tensor, labelTensor] 
+			if len(self.similarity_labels)>0:
+				eg = self.yieldFunction(objective)
+				yield eg
+				# im1Tensor = self.transforms.__call__(np.array(self.similarity_buffer[0]))
+				# im2Tensor = self.transforms.__call__(np.array(self.similarity_buffer[1]))
+				# labelTensor = self.totensor.__call__(np.array(self.similarity_labels))
+				# yield ['S', im1Tensor, im2Tensor, labelTensor] 
 
+
+	def yieldFunction(self, objective, category_pair=None):
+
+		if objective=='C'
+			im1Tensor = cat((self.transforms.__call__(x) for x in self.compatibility_buffer[category_pair][0]), 0)
+			im2Tensor = cat((self.transforms.__call__(x) for x in self.compatibility_buffer[category_pair][1]), 0)
+			labelTensor = self.totensor.__call__(np.array(self.compatibility_labels[category_pair]))
+			self.compatibility_buffer[category_pair][0]=[]
+			self.compatibility_buffer[category_pair][1]=[]
+			self.compatibility_labels[category_pair] = []
+			return [objective, im1Tensor, im2Tensor, labelTensor, category_pair]
+		else:
+			im1Tensor = cat((self.transforms.__call__(x) for x in self.similarity_buffer[0]), 0)
+			im2Tensor = cat((self.transforms.__call__(x) for x in self.similarity_buffer[1]), 0)
+			labelTensor = self.totensor.__call__(np.array(self.similarity_labels))
+			self.similarity_buffer[0] = []
+			self.similarity_buffer[1] = []
+			self.similarity_labels = []
+			return ['S', im1Tensor, im2Tensor, labelTensor] 
