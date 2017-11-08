@@ -2,7 +2,7 @@ class removeGIFs:
 
 	def __init__(self, file):
 		self.inputfile = file
-		self.outputfile = file.split('/')[:-1] + "fixed_" + file.split('/')[-1]
+		self.outputfile = '/'.join(file.split('/')[:-1] + ["fixed_" + file.split('/')[-1]])
 		self.removeGifEgs()
 
 	def removeGifEgs(self):
