@@ -1,18 +1,21 @@
 from PIL import Image
 from torchvision.transforms import ToTensor, Normalize, Resize, RandomCrop, Compose
+from itertools import izip_longest
 
 class SiameseNetworkDataset:
 
-	def __init__(self,imageFile,inputSize):
+	def __init__(self, imageFile, inputSize, minibatchSize):
 		self.inputSize = inputSize
 		self.imageFile = imageFile
+		self.minibatchSize = minibatchSize
 		self.resize = Resize(self.inputSize)
 		self.transforms = Compose([RandomCrop(self.inputSize), ToTensor(),
 		Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])])
 		
 	def __getitem__(self):
 		with open(self.imageFile) as f:
-			for line in f:
+			# for line in f:
+			for next_n_lines in izip_longest(*[f] * self.minibatchSize):
 
 				# im1, im2, label = line.rstrip().split()
 				eg_info = line.rstrip().split()
