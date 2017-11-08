@@ -40,8 +40,8 @@ class SiameseNetworkDataset:
 				objective = eg_info[0]
 				if eg_info=='C':
 					category_pair = eg_info[4]
-					compatibility_buffer[category_pair][0].append(im1)
-					compatibility_buffer[category_pair][1].append(im2)
+					compatibility_buffer[category_pair][0].append(np.array(im1))
+					compatibility_buffer[category_pair][1].append(np.array(im2))
 					compatibility_labels[category_pair].append(eg_info[3])
 
 					if len(compatibility_labels[category_pair])==self.minibatchSize:
@@ -54,8 +54,8 @@ class SiameseNetworkDataset:
 						yield [objective, im1Tensor, im2Tensor, labelTensor, category_pair]
 
 				else:
-					similarity_buffer[0].append(im1)
-					similarity_buffer[1].append(im2)
+					similarity_buffer[0].append(np.array(im1))
+					similarity_buffer[1].append(np.array(im2))
 					similarity_labels.append(eg_info[3])
 
 					if len(similarity_labels)==self.minibatchSize:
