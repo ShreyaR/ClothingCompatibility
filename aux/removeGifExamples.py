@@ -10,7 +10,7 @@ class removeGIFs:
 		with open(self.inputfile) as f:
 			for line in f:
 				info = line.rstrip().split(' ')
-				if info[1].split('.')!='gif' and info[2].split('.')!='gif':
+				if info[1].split('.')[-1]!='gif' and info[2].split('.')[-1]!='gif':
 					outfile.write(line)
 
 		outfile.close()

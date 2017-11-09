@@ -23,9 +23,14 @@ class SiameseNetworkDataset:
 
 			for line in f:
 				eg_info = line.rstrip().split()
-				im1 = Image.open(eg_info[1])
-				im2 = Image.open(eg_info[2])
-	
+				try:
+					im1 = Image.open(eg_info[1])
+				except IOError:
+					continue
+				try:
+					im2 = Image.open(eg_info[2])
+				except:
+					continue
 				im1 =  self.resize.__call__(im1)
 				im2 = self.resize.__call__(im2)
 				
@@ -63,7 +68,7 @@ class SiameseNetworkDataset:
 		if objective=='C':
 			im1Tensor = stack([self.transforms.__call__(x) for x in self.compatibility_buffer[category_pair][0]], 0)
 			im2Tensor = stack([self.transforms.__call__(x) for x in self.compatibility_buffer[category_pair][1]], 0)
-			labelTensor = from_numpy(np.array(self.compatibility_labels[category_pair]))
+			labelTensor = from_numpy(np.array(self.compatibility_labels[category_pair])).float()
 			self.compatibility_buffer[category_pair][0]=[]
 			self.compatibility_buffer[category_pair][1]=[]
 			self.compatibility_labels[category_pair] = []
@@ -71,7 +76,7 @@ class SiameseNetworkDataset:
 		else:
 			im1Tensor = stack([self.transforms.__call__(x) for x in self.similarity_buffer[0]], 0)
 			im2Tensor = stack([self.transforms.__call__(x) for x in self.similarity_buffer[1]], 0)
-			labelTensor = from_numpy(np.array(self.similarity_labels))
+			labelTensor = from_numpy(np.array(self.similarity_labels)).float()
 			self.similarity_buffer[0] = []
 			self.similarity_buffer[1] = []
 			self.similarity_labels = []

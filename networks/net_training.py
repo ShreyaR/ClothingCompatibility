@@ -39,7 +39,7 @@ grad_history = open(gradnorm_file, 'w')
 training_history = open(trainingloss_file, 'w')
 val_history = open(valloss_file, 'w')
 auc_history = open(auc_file, 'w')
-infreq_training_history = open(infrequent_training_loss, 'w')
+infreq_training_history = open(infrequent_trainingloss_file, 'w')
 
 for epoch in range(0,train_number_epochs):
 
@@ -61,8 +61,8 @@ for epoch in range(0,train_number_epochs):
             output1,output2 = net(objective,im1,im2)
 
         optimizer.zero_grad()
-        loss_contrastive = criterion(output1,output2,label)
-        grad_norm = torch.nn.utils.clip_grad_norm(net.parameters, max_gradnorm)
+        loss_contrastive = criterion(objective,output1,output2,label)
+        grad_norm = torch.nn.utils.clip_grad_norm(net.parameters(), max_gradnorm)
         print grad_norm
         loss_contrastive.backward()
         optimizer.step()
@@ -74,8 +74,8 @@ for epoch in range(0,train_number_epochs):
 
 
         print "Done training and Logging"
-        print i, loss_contrastive.data[0]
-
+        print i, objective, loss_contrastive.data[0]
+	"""
         if i % validation_evaluation_frequency == 0 :
             infreq_training_history.write(objective + ' ' + str(loss_contrastive) + '\n')
 
@@ -86,15 +86,15 @@ for epoch in range(0,train_number_epochs):
                 im1 = val_example[1]
                 im2 = val_example[2]
                 label = val_example[3]                
-
+		im1, im2 , label = Variable(im1).cuda(), Variable(im2).cuda() , Variable(label).cuda()
                 if len(val_example)==5:
                     categorypair = val_example[4]
                     output1,output2 = net(objective,im1,im2,categorypair)
                 else:
                     output1,output2 = net(objective,im1,im2)
 
-                optimizer = zero_grad()
-                loss_contrastive = criterion(output1,output2,label)
+                optimizer.zero_grad()
+                loss_contrastive = criterion(objective,output1,output2,label)
                 loss.append(loss_contrastive)
 
             avg_loss = float(sum(loss))/len(loss)
@@ -104,7 +104,8 @@ for epoch in range(0,train_number_epochs):
             iteration_number += validation_evaluation_frequency
             counter.append(iteration_number)
             loss_history.append(loss_contrastive.data[0])
-
+            print "Done with validation set" 
+	"""	
         i+=1
         
 
