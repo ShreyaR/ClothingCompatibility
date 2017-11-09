@@ -66,9 +66,13 @@ class SiameseNetworkDataset:
 
 	def yieldFunction(self, objective, category_pair=None):
 		if objective=='C':
-			im1Tensor = stack([self.transforms.__call__(x) for x in self.compatibility_buffer[category_pair][0]], 0)
-			im2Tensor = stack([self.transforms.__call__(x) for x in self.compatibility_buffer[category_pair][1]], 0)
-			labelTensor = from_numpy(np.array(self.compatibility_labels[category_pair])).float()
+			try:
+				im1Tensor = stack([self.transforms.__call__(x) for x in self.compatibility_buffer[category_pair][0]], 0)
+				im2Tensor = stack([self.transforms.__call__(x) for x in self.compatibility_buffer[category_pair][1]], 0)
+				labelTensor = from_numpy(np.array(self.compatibility_labels[category_pair])).float()
+			except RuntimeError:
+				
+				return None
 			self.compatibility_buffer[category_pair][0]=[]
 			self.compatibility_buffer[category_pair][1]=[]
 			self.compatibility_labels[category_pair] = []
