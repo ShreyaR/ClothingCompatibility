@@ -7,6 +7,7 @@ from minibatch_loading import SiameseNetworkDataset
 from torch.autograd import Variable
 import os
 
+
 # Hyperparameters
 train_number_epochs = 1
 minibatch_size = 32
@@ -26,7 +27,7 @@ validation_evaluation_frequency = 1000
 
 os.environ["CUDA_VISIBLE_DEVICES"]="0"
 # net = SiameseNetwork().cuda()
-net = Net(primary_embedding_dim, sec_embedding_dim).cuda()
+net = Net(primary_embedding_dim, sec_embedding_dim, pretrained=True).cuda()
 criterion = ContrastiveLoss()
 optimizer = optim.Adam(net.parameters(),lr=learning_rate)
 
@@ -75,37 +76,40 @@ for epoch in range(0,train_number_epochs):
 
         print "Done training and Logging"
         print i, objective, loss_contrastive.data[0]
-	"""
-        if i % validation_evaluation_frequency == 0 :
+	
+        if i % validation_evaluation_frequency == 0:
+
             infreq_training_history.write(objective + ' ' + str(loss_contrastive) + '\n')
+            # Checkpoint Current Model
+            torch.save({'epoch': epoch+1, 'minibatch':i+1, 'state_dict': net.float().state_dict(), 'optimizer':optimizer.state_dict()})
 
-            # Validation Loss
-            loss = []
-            for val_example in validation_dataloader.__getitem__():
-                objective = val_example[0]
-                im1 = val_example[1]
-                im2 = val_example[2]
-                label = val_example[3]                
-		im1, im2 , label = Variable(im1).cuda(), Variable(im2).cuda() , Variable(label).cuda()
-                if len(val_example)==5:
-                    categorypair = val_example[4]
-                    output1,output2 = net(objective,im1,im2,categorypair)
-                else:
-                    output1,output2 = net(objective,im1,im2)
+  #           # Validation Loss
+  #           loss = []
+  #           for val_example in validation_dataloader.__getitem__():
+  #               objective = val_example[0]
+  #               im1 = val_example[1]
+  #               im2 = val_example[2]
+  #               label = val_example[3]                
+		# im1, im2 , label = Variable(im1).cuda(), Variable(im2).cuda() , Variable(label).cuda()
+  #               if len(val_example)==5:
+  #                   categorypair = val_example[4]
+  #                   output1,output2 = net(objective,im1,im2,categorypair)
+  #               else:
+  #                   output1,output2 = net(objective,im1,im2)
 
-                optimizer.zero_grad()
-                loss_contrastive = criterion(objective,output1,output2,label)
-                loss.append(loss_contrastive)
+  #               optimizer.zero_grad()
+  #               loss_contrastive = criterion(objective,output1,output2,label)
+  #               loss.append(loss_contrastive)
 
-            avg_loss = float(sum(loss))/len(loss)
-            val_history.write(str(avg_loss) + '\n')
+  #           avg_loss = float(sum(loss))/len(loss)
+  #           val_history.write(str(avg_loss) + '\n')
 
-            # print("Epoch number {}\n Current loss {}\n".format(epoch,loss_contrastive.data[0]))
-            iteration_number += validation_evaluation_frequency
-            counter.append(iteration_number)
-            loss_history.append(loss_contrastive.data[0])
-            print "Done with validation set" 
-	"""	
+  #           # print("Epoch number {}\n Current loss {}\n".format(epoch,loss_contrastive.data[0]))
+  #           iteration_number += validation_evaluation_frequency
+  #           counter.append(iteration_number)
+  #           loss_history.append(loss_contrastive.data[0])
+  #           print "Done with validation set" 
+	
         i+=1
         
 
