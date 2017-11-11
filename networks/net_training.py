@@ -64,54 +64,22 @@ for epoch in range(0,train_number_epochs):
         optimizer.zero_grad()
         loss_contrastive = criterion(objective,output1,output2,label)
         grad_norm = torch.nn.utils.clip_grad_norm(net.parameters(), max_gradnorm)
-        print grad_norm
         loss_contrastive.backward()
         optimizer.step()
-
 
         # Logging
         grad_history.write(str(grad_norm) + '\n')
         training_history.write(objective + ' ' + str(loss_contrastive) + '\n')
 
-
         print "Done training and Logging"
-        print i, objective, loss_contrastive.data[0]
+        print i, objective, type(loss_contrastive.data[0])
 	
         if i % validation_evaluation_frequency == 0:
-
-            infreq_training_history.write(objective + ' ' + str(loss_contrastive) + '\n')
-            # Checkpoint Current Model
-            torch.save({'epoch': epoch+1, 'minibatch':i+1, 'state_dict': net.float().state_dict(), 'optimizer':optimizer.state_dict()})
-
-  #           # Validation Loss
-  #           loss = []
-  #           for val_example in validation_dataloader.__getitem__():
-  #               objective = val_example[0]
-  #               im1 = val_example[1]
-  #               im2 = val_example[2]
-  #               label = val_example[3]                
-		# im1, im2 , label = Variable(im1).cuda(), Variable(im2).cuda() , Variable(label).cuda()
-  #               if len(val_example)==5:
-  #                   categorypair = val_example[4]
-  #                   output1,output2 = net(objective,im1,im2,categorypair)
-  #               else:
-  #                   output1,output2 = net(objective,im1,im2)
-
-  #               optimizer.zero_grad()
-  #               loss_contrastive = criterion(objective,output1,output2,label)
-  #               loss.append(loss_contrastive)
-
-  #           avg_loss = float(sum(loss))/len(loss)
-  #           val_history.write(str(avg_loss) + '\n')
-
-  #           # print("Epoch number {}\n Current loss {}\n".format(epoch,loss_contrastive.data[0]))
-  #           iteration_number += validation_evaluation_frequency
-  #           counter.append(iteration_number)
-  #           loss_history.append(loss_contrastive.data[0])
-  #           print "Done with validation set" 
-	
-        i+=1
-        
+		
+		infreq_training_history.write(objective + ' ' + str(loss_contrastive.data[0]) + '\n')
+            	# Checkpoint Current Model
+            	torch.save({'epoch': epoch+1, 'minibatch':i+1, 'state_dict': net.float().state_dict(), 'optimizer':optimizer.state_dict()}, "/data/srajpal2/AmazonDataset/Checkpoints/epoch%d_minibatch%d.pth" % (epoch+1, i+1))
+	i+=1
 
 grad_history.close()
 training_history.close()

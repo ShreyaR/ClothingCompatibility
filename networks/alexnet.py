@@ -6,18 +6,18 @@ from torchvision.models import alexnet
 
 class Net(torch.nn.Module):
 
-	def __init__(self, primaryEmbeddingSize, secEmbeddingSize):
+	def __init__(self, primaryEmbeddingSize, secEmbeddingSize, pretrained=True):
 		super(Net, self).__init__()
-		self.network = alexnet(pretrained=True)
+		self.network = alexnet(pretrained=pretrained)
 		# self.network.classifier = nn.Sequential(*(self.network.classifier[i] for i in range()))
 		self.network.classifier.add_module('7', nn.Linear(1000, primaryEmbeddingSize))
 
-		self.bt_top = nn.Linear(primaryEmbeddingSize, secEmbeddingSize)
-		self.bt_bottom = nn.Linear(primaryEmbeddingSize, secEmbeddingSize)
-		self.st_shoe = nn.Linear(primaryEmbeddingSize, secEmbeddingSize)
-		self.st_top = nn.Linear(primaryEmbeddingSize, secEmbeddingSize)
-		self.bs_bottom = nn.Linear(primaryEmbeddingSize, secEmbeddingSize)
-		self.bs_shoe = nn.Linear(primaryEmbeddingSize, secEmbeddingSize)
+		self.bt_top = nn.Linear(primaryEmbeddingSize, secEmbeddingSize, bias=False)
+		self.bt_bottom = nn.Linear(primaryEmbeddingSize, secEmbeddingSize, bias=False)
+		self.st_shoe = nn.Linear(primaryEmbeddingSize, secEmbeddingSize, bias=False)
+		self.st_top = nn.Linear(primaryEmbeddingSize, secEmbeddingSize, bias=False)
+		self.bs_bottom = nn.Linear(primaryEmbeddingSize, secEmbeddingSize, bias=False)
+		self.bs_shoe = nn.Linear(primaryEmbeddingSize, secEmbeddingSize, bias=False)
 
 
 	def similarity_forward_once(self, x):
