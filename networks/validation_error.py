@@ -6,6 +6,7 @@ from contrastive_loss import ContrastiveLoss
 from minibatch_loading import SiameseNetworkDataset
 from torch.autograd import Variable
 import os
+import sys
 
 os.environ["CUDA_VISIBLE_DEVICES"]="1"
 
@@ -33,7 +34,6 @@ class validation:
 		validation_dataloader = SiameseNetworkDataset(self.validation_data, self.image_size, 1)
 		val_history = open(self.valloss_file, 'w')
 		losses = []
-		count = 0
 
 		for example in validation_dataloader.__getitem__():
 	        	objective = example[0]
@@ -52,15 +52,16 @@ class validation:
 
 	        	self.optimizer.zero_grad()
 	        	loss_contrastive = self.criterion(objective,output1,output2,label)
-			losses.append(loss_contrastive)
-	        	# Logging
-		
+			losses.append(loss_contrastive.data[0])
+
+	
 		avg_loss = float(sum(losses))/len(losses)
 		val_history.write("%d, %d\n" % (self.iteration_num, avg_loss))
 
-        	print "Done"
+        	print "Validation Completed!"
 
+validation(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], int(sys.argv[5]), int(sys.argv[6]), int(sys.argv[7]), int(sys.argv[8]), float(sys.argv[9]))
 
-validation("/data/srajpal2/AmazonDataset/Checkpoints/epoch1_minibatch1.pth", "/data/srajpal2/AmazonDataset/fixed_val_pairs.txt", "/data/srajpal2/AmazonDataset/TrainingHistory/val_history.txt", "whatevs", 227, 256, 32, 0, 0.0005)
+#validation("/data/srajpal2/AmazonDataset/Checkpoints/epoch1_minibatch1.pth", "/data/srajpal2/AmazonDataset/fixed_val_pairs.txt", "/data/srajpal2/AmazonDataset/TrainingHistory/val_history.txt", "whatevs", 227, 256, 32, 0, 0.0005)
 
 

@@ -6,7 +6,8 @@ from contrastive_loss import ContrastiveLoss
 from minibatch_loading import SiameseNetworkDataset
 from torch.autograd import Variable
 import os
-
+from multiprocessing import Process, Pool
+#from validation_error import validation
 
 # Hyperparameters
 train_number_epochs = 1
@@ -42,6 +43,13 @@ val_history = open(valloss_file, 'w')
 auc_history = open(auc_file, 'w')
 infreq_training_history = open(infrequent_trainingloss_file, 'w')
 
+def perform_validation(checkpoint, iteration_num):
+	#val_instance = validation(checkpoint, validation_data, valloss_file, auc_file, image_size, primary_embedding_dim, sec_embedding_dim, iteration_num, learning_rate)
+	
+	os.system("python validation_error.py %s %s %s %s %d %d %d %d %f" % (checkpoint, validation_data, valloss_file, auc_file, image_size, primary_embedding_dim, sec_embedding_dim, iteration_num, learning_rate))
+	return
+		
+
 for epoch in range(0,train_number_epochs):
 
     train_dataloader = SiameseNetworkDataset(training_data, image_size, minibatch_size)
@@ -71,14 +79,20 @@ for epoch in range(0,train_number_epochs):
         grad_history.write(str(grad_norm) + '\n')
         training_history.write(objective + ' ' + str(loss_contrastive) + '\n')
 
-        print "Done training and Logging"
-        print i, objective, type(loss_contrastive.data[0])
-	
+        # print "Done training and Logging"
+        #print i, objective, type(loss_contrastive.data[0])
+	print i
         if i % validation_evaluation_frequency == 0:
 		
 		infreq_training_history.write(objective + ' ' + str(loss_contrastive.data[0]) + '\n')
             	# Checkpoint Current Model
             	torch.save({'epoch': epoch+1, 'minibatch':i+1, 'state_dict': net.float().state_dict(), 'optimizer':optimizer.state_dict()}, "/data/srajpal2/AmazonDataset/Checkpoints/epoch%d_minibatch%d.pth" % (epoch+1, i+1))
+		#pool = Pool(processes=1)
+		#pool.apply_async(perform_validation, ("/data/srajpal2/AmazonDataset/Checkpoints/epoch%d_minibatch%d.pth" % (epoch+1, i+1), i))
+		p = Process(target=perform_validation, args=("/data/srajpal2/AmazonDataset/Checkpoints/epoch%d_minibatch%d.pth" % (epoch+1, i+1), i))
+		p.start()
+		#p.join(0.01)
+
 	i+=1
 
 grad_history.close()
