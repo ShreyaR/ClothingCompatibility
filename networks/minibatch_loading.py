@@ -9,7 +9,9 @@ class SiameseNetworkDataset:
 		self.inputSize = inputSize
 		self.imageFile = imageFile
 		self.minibatchSize = minibatchSize
-		self.resize = Resize((self.inputSize, self.inputSize))
+		#self.resize = Resize((self.inputSize, self.inputSize))
+		self.resize = Resize(self.inputSize)
+		self.randomcrop = RandomCrop(self.inputSize)
 		self.totensor = ToTensor()
 		self.transforms = Compose([ToTensor(),
 			Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])])
@@ -40,8 +42,8 @@ class SiameseNetworkDataset:
 				except:
 					self.IOErrorLog.write(str(line_num) + '\n')
 					continue
-				im1 =  self.resize.__call__(im1)
-				im2 = self.resize.__call__(im2)
+				im1 = self.randomcrop.__call__(self.resize.__call__(im1))
+				im2 = self.randomcrop.__call__(self.resize.__call__(im2))
 				
 				objective = eg_info[0]
 				if objective=='C':
