@@ -32,7 +32,7 @@ class validation:
 	def validation_loss(self):
 
 		validation_dataloader = SiameseNetworkDataset(self.validation_data, self.image_size, 1)
-		val_history = open(self.valloss_file, 'w')
+		val_history = open(self.valloss_file, 'a')
 		losses = []
 
 		for example in validation_dataloader.__getitem__():
@@ -56,7 +56,7 @@ class validation:
 
 	
 		avg_loss = float(sum(losses))/len(losses)
-		val_history.write("%d, %d\n" % (self.iteration_num, avg_loss))
+		val_history.write("%d, %f\n" % (self.iteration_num, avg_loss))
 
         	print "Validation Completed!"
 

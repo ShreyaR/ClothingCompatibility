@@ -3,6 +3,7 @@ from torch.autograd import Variable
 import torch.nn as nn
 import torch.nn.functional as F
 from torchvision.models import alexnet
+import numpy as np
 
 class Net(torch.nn.Module):
 
@@ -18,6 +19,28 @@ class Net(torch.nn.Module):
 		self.st_top = nn.Linear(primaryEmbeddingSize, secEmbeddingSize, bias=False)
 		self.bs_bottom = nn.Linear(primaryEmbeddingSize, secEmbeddingSize, bias=False)
 		self.bs_shoe = nn.Linear(primaryEmbeddingSize, secEmbeddingSize, bias=False)
+		
+		for l in [self.bt_top, self.bt_bottom, self.st_shoe, self.st_top, self.bs_bottom, self.bs_shoe]:
+			self.weights_init(l, 0.01)
+	
+	def weights_init(self, m, gain):
+    		classname = m.__class__.__name__
+    		if classname.find('Conv') != -1:
+        		weight_shape = list(m.weight.data.size())
+        		fan_in = np.prod(weight_shape[1:4])
+        		fan_out = np.prod(weight_shape[2:4]) * weight_shape[0]
+        		w_bound = gain*np.sqrt(6. / (fan_in + fan_out))
+		        m.weight.data.uniform_(-w_bound, w_bound)
+		        if m.bias is not None:
+				m.bias.data.fill_(0)
+		elif classname.find('Linear') != -1:
+        		weight_shape = list(m.weight.data.size())
+        		fan_in = weight_shape[1]
+        		fan_out = weight_shape[0]
+        		w_bound = gain*np.sqrt(6. / (fan_in + fan_out))
+        		m.weight.data.uniform_(-w_bound, w_bound)
+			if m.bias is not None:
+        			m.bias.data.fill_(0)
 
 
 	def similarity_forward_once(self, x):

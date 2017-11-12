@@ -7,16 +7,17 @@ from minibatch_loading import SiameseNetworkDataset
 from torch.autograd import Variable
 import os
 from multiprocessing import Process, Pool
+import torch.nn.functional as F
 #from validation_error import validation
 
 # Hyperparameters
 train_number_epochs = 1
 minibatch_size = 32
-gradnorm_file = '/data/srajpal2/AmazonDataset/TrainingHistory/grad_norm.txt'
-auc_file = '/data/srajpal2/AmazonDataset/TrainingHistory/auc.txt'
-trainingloss_file = '/data/srajpal2/AmazonDataset/TrainingHistory/training_loss.txt'
-infrequent_trainingloss_file = '/data/srajpal2/AmazonDataset/TrainingHistory/infrequent_training_loss.txt'
-valloss_file = '/data/srajpal2/AmazonDataset/TrainingHistory/val_loss.txt'
+gradnorm_file = '/data/srajpal2/AmazonDataset/TrainingHistory/V1/grad_norm.txt'
+auc_file = '/data/srajpal2/AmazonDataset/TrainingHistory/V1/auc.txt'
+trainingloss_file = '/data/srajpal2/AmazonDataset/TrainingHistory/V1/training_loss.txt'
+infrequent_trainingloss_file = '/data/srajpal2/AmazonDataset/TrainingHistory/V1/infrequent_training_loss.txt'
+valloss_file = '/data/srajpal2/AmazonDataset/TrainingHistory/V1/val_loss.txt'
 image_size = 227
 learning_rate = 0.0005
 primary_embedding_dim = 256
@@ -68,18 +69,44 @@ for epoch in range(0,train_number_epochs):
 
         optimizer.zero_grad()
         loss_contrastive = criterion(objective,output1,output2,label)
-        #grad_norm = torch.nn.utils.clip_grad_norm(net.parameters(), max_gradnorm)
+        grad_norm = torch.nn.utils.clip_grad_norm(net.parameters(), max_gradnorm)
+
+	#print F.pairwise_distance(output1, output2)
+
+	print i, loss_contrastive.data[0], grad_norm
+
+	#print net.bt_top.weight
+        #print net.st_top.weight
+        #print net.bs_shoe.weight
+
 
 	loss_contrastive.backward()
 	optimizer.step()
-	print objective,im1.grad.size()
 
+	
+        #print net.bt_top.weight
+        #print net.st_top.weight
+        #print net.bs_shoe.weight
+	
+	#param_count = 0
+	#for p in net.parameters():
+	#	try:
+	#		print param_count, p.grad.size(), torch.max(p.grad).data[0], torch.min(p.grad).data[0]
+	#	except AttributeError:
+	#		print param_count 
+	#	param_count += 1
+	
+	#print "========================="
+	#if i==50:
+	#	break 
         # Logging
         #grad_history.write(str(grad_norm) + '\n')
-        training_history.write(objective + ' ' + str(loss_contrastive) + '\n')
-
-	print i, loss_contrastive.data[0]#, grad_norm
-        if i % validation_evaluation_frequency == 0:
+	if len(example)==5:
+        	training_history.write(objective + ' ' + str(loss_contrastive.data[0]) + ' ' + example[4]  + '\n')
+	else:
+        	training_history.write(objective + ' ' + str(loss_contrastive.data[0]) + '\n')
+        
+	if i % validation_evaluation_frequency == 0:
 		
 		infreq_training_history.write(objective + ' ' + str(loss_contrastive.data[0]) + '\n')
             	# Checkpoint Current Model
@@ -91,7 +118,6 @@ for epoch in range(0,train_number_epochs):
 
 grad_history.close()
 training_history.close()
-val_history.close()
 auc_history.close()
 infreq_training_history.close()
 
