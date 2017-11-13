@@ -10,15 +10,15 @@ class removeGIFs:
 		with open(self.inputfile) as f:
 			for line in f:
 				info = line.rstrip().split(' ')
-				if info[1].split('.')[-1]!='gif' and info[2].split('.')[-1]!='gif':
+				if info[0].split('.')[-1]!='gif' and info[1].split('.')[-1]!='gif':
 					outfile.write(line)
 
 		outfile.close()
 
 
-train = removeGIFs('/data/srajpal2/AmazonDataset/training_pairs.txt')
-test = removeGIFs('/data/srajpal2/AmazonDataset/testing_pairs.txt')
-val = removeGIFs('/data/srajpal2/AmazonDataset/val_pairs.txt')
+#train = removeGIFs('/data/srajpal2/AmazonDataset/training_pairs.txt')
+#test = removeGIFs('/data/srajpal2/AmazonDataset/testing_pairs.txt')
+val = removeGIFs('/data/srajpal2/AmazonDataset/fixed_similarity_val_pairs.txt')
 
 
 

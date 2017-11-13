@@ -7,25 +7,37 @@ from similarity_network import Net
 import os
 import sys
 from torch.utils.data import DataLoader
+import cPickle as pickle
+import os
 
 os.environ["CUDA_VISIBLE_DEVICES"]="1"
 
 class validation:
 
-	def __init__(self, checkpoint, validation_data, valloss_file, image_size, primary_embedding_dim, iteration_num):
+	def __init__(self, checkpoint, validation_data, valloss_file, image_size, primary_embedding_dim, iteration_num, prev_checkpoint):
 		self.validation_data = validation_data
 		self.valloss_file = valloss_file
-		self.auc_file = auc_file
 		self.image_size = image_size
 		self.iteration_num = iteration_num
 		self.net = Net(primary_embedding_dim, pretrained=False).cuda()
 		self.net.eval()
+		checkpoint_path = checkpoint
 		# Load saved network
-		# checkpoint = torch.load(checkpoint, map_location={'cuda:0':'cuda:1'})
 		checkpoint = torch.load(checkpoint, map_location=lambda storage, loc: storage.cuda(0))
 		self.net.load_state_dict(checkpoint['state_dict'])
 		self.criterion = ContrastiveLoss()
-		self.validation_loss()
+		loss = self.validation_loss()
+		if prev_checkpoint!='None':
+			prev_loss = pickle.load(open('/'.join(checkpoint_path.split('/')[:-2] + ['prev_loss.p']), 'rb'))
+			if loss < prev_loss:
+				pickle.dump(loss, open('/'.join(checkpoint_path.split('/')[:-2] + ['prev_loss.p']), 'wb'))
+				os.system("rm %s" % prev_checkpoint)
+			else:
+				os.system("mv %s %s" % (prev_checkpoint, checkpoint_path))
+		else:
+			pickle.dump(loss, open('/'.join(checkpoint_path.split('/')[:-2] + ['prev_loss.p']), 'wb'))
+		
+			
 
 	def validation_loss(self):
 		data = dataset(self.validation_data, self.image_size)
@@ -33,24 +45,25 @@ class validation:
 		val_history = open(self.valloss_file, 'a')
 		losses = []
 
-		for example in validation_dataloader.__getitem__():
+		for example in validation_dataloader:
 	        	
-        	im1 = example['im1']
-        	im2 = example['im2']
-        	label = example['label']
+        		im1 = example['im1']
+        		im2 = example['im2']
+        		label = example['label']
 
-        	im1, im2 , label = Variable(im1).cuda(), Variable(im2).cuda() , Variable(label).cuda()
+        		im1, im2 , label = Variable(im1).cuda(), Variable(im2).cuda() , Variable(label.float()).cuda()
 			output1,output2 = self.net(im1,im2)
-            loss_contrastive = self.criterion(objective,output1,output2,label)
+       			loss_contrastive = self.criterion(output1,output2,label)
 			
 			losses.append(loss_contrastive.data[0])
 
-	
+
 		avg_loss = float(sum(losses))/len(losses)
 		val_history.write("%d, %f\n" % (self.iteration_num, avg_loss))
 
-        print "Validation Completed!"
+        	print "Validation Completed!"
+		return avg_loss
 
-validation(sys.argv[1], sys.argv[2], sys.argv[3], int(sys.argv[4]), int(sys.argv[5]), int(sys.argv[6]))
+validation(sys.argv[1], sys.argv[2], sys.argv[3], int(sys.argv[4]), int(sys.argv[5]), int(sys.argv[6]), sys.argv[7])
 
 
