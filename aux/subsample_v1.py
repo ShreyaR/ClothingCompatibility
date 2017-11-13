@@ -6,12 +6,10 @@ def segregate(f1, f2, f3, f4, f5):
 	outfile_c3 = open(f4, 'w')
 	outfile_s = open(f5, 'w')
 
-	file_map = {'tb':outfile_c1,
-		    	'bt':outfile_c1,
+	file_map = {'bt':outfile_c1,
 			'bs':outfile_c2,
-			'sb':outfile_c2,
-			'st':outfile_c3,
-			'ts':outfile_c3}
+			'st':outfile_c3}
+	flip_list = {'tb', 'ts', 'sb'}
 
 	print f1
 	with open(f1) as f:
@@ -21,9 +19,17 @@ def segregate(f1, f2, f3, f4, f5):
 			objective = line.rstrip().split(' ')[0]
 			if objective=='C':
 				category = line.rstrip().split(' ')[4]
-				file_map[category].write(line)
+				if category in flip_list:
+					category = "%c%c" % (category[1], category[0])
+					info = line.rstrip().split(' ')[1:4]
+					info[1], info[0] = info[0], info[1]
+					info = ' '.join(info)
+				else:
+					info = ' '.join(line.rstrip().split(' ')[1:4])
+				file_map[category].write(info + '\n')
 			else:
-				outfile_s.write(line)
+				info = ' '.join(line.rstrip().split(' ')[1:4])
+				outfile_s.write(info + '\n')
 	print count
 	outfile_c1.close()
 	outfile_c2.close()

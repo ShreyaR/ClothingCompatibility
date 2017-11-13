@@ -10,7 +10,7 @@ class pair_creation:
 		self.compatibility_neg2pos = compatibility_neg2pos
 		self.similarity_neg2pos = similarity_neg2pos
 		self.type_of_data = type_of_data
-		self.outfile = open('/data/srajpal2/AmazonDataset/%s_pairs.txt' % (self.type_of_data), 'w')
+		self.outfile = open('/data/srajpal2/AmazonDataset/similarity_%s_pairs.txt' % (self.type_of_data), 'w')
 		self.category_map = {}
 		self.url_map = {}
 		self.inverse_category_maps = {'t':[], 'b':[], 's':[]}
@@ -109,9 +109,9 @@ class pair_creation:
 		return '/'.join(url)
 
 
-print "Training Pairs"
-x1 = pair_creation('training', 10, 10)
-print "\n\nTesting Pairs"
-x2 = pair_creation('testing', 1, 0)
+#print "Training Pairs"
+#x1 = pair_creation('training', 10, 10)
+#print "\n\nTesting Pairs"
+#x2 = pair_creation('testing', 1, 0)
 print "\n\nValidation Pairs"
-x3 = pair_creation('val', 1, 0)
+x3 = pair_creation('val', 0, 1)
