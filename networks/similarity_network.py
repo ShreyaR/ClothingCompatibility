@@ -17,7 +17,8 @@ class Net(torch.nn.Module):
 		"""
 		Takes as input a 3*224*224 image, returns an embedding of length 4096.
 		"""
-		x = F.normalize(self.network(x), p=2)
+		#x = F.normalize(self.network(x), p=2)
+		x = self.network(x)
 		return x
 
 	def forward(self, image1, image2):

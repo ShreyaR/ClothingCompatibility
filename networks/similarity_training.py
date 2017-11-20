@@ -12,18 +12,24 @@ from time import time
 
 # Hyperparameters
 train_number_epochs = 1
-version = 6
-gradnorm_file = '/data/srajpal2/AmazonDataset/TrainingHistory/V%d/Similarity/grad_norm.txt' % (version)
-trainingloss_file = '/data/srajpal2/AmazonDataset/TrainingHistory/V%d/Similarity/training_loss.txt' % (version)
-infrequent_trainingloss_file = '/data/srajpal2/AmazonDataset/TrainingHistory/V%d/Similarity/infrequent_training_loss.txt' % (version)
-valloss_file = '/data/srajpal2/AmazonDataset/TrainingHistory/V%d/Similarity/val_loss.txt' % (version)
+version = 7
+gradnorm_file = '../TrainingHistory/V%d/Similarity/grad_norm.txt' % (version)
+trainingloss_file = '../TrainingHistory/V%d/Similarity/training_loss.txt' % (version)
+infrequent_trainingloss_file = '../TrainingHistory/V%d/Similarity/infrequent_training_loss.txt' % (version)
+valloss_file = '../TrainingHistory/V%d/Similarity/val_loss.txt' % (version)
 image_size = 227
-learning_rate = 0.00005
+learning_rate = 0.005
 primary_embedding_dim = 256
 max_gradnorm = 40
 training_datadir = '/data/srajpal2/AmazonDataset/similarity_training/minibatches/'
 validation_data = '/data/srajpal2/AmazonDataset/pure_similarity_val_pairs.txt'
 validation_evaluation_frequency = 200
+
+if not os.path.isdir('/data/srajpal2/AmazonDataset/Checkpoints/V%d/Similarity' % version):
+	os.makedirs('/data/srajpal2/AmazonDataset/Checkpoints/V%d/Similarity' % version)
+if not os.path.isdir('../TrainingHistory/V%d/Similarity' % version):
+	os.makedirs('../TrainingHistory/V%d/Similarity' % version)
+
 
 os.environ["CUDA_VISIBLE_DEVICES"]="3"
 net = Net(primary_embedding_dim, pretrained=True).cuda()
@@ -42,7 +48,6 @@ def perform_validation(checkpoint, iteration_num, prev_checkpoint):
 dset = batched_dataset(training_datadir, image_size)
 loader = DataLoader(dset, num_workers=8)
 
-
 i_batch = -1
 prev_time = time()
 prev_checkpoint = None
@@ -58,8 +63,8 @@ for sample_batched in loader:
 	output1, output2 = net(im1, im2)
 	optimizer.zero_grad()
 	loss_contrastive = criterion(output1,output2,label)
-	grad_norm = torch.nn.utils.clip_grad_norm(net.parameters(), max_gradnorm)
 	loss_contrastive.backward()
+	grad_norm = torch.nn.utils.clip_grad_norm(net.parameters(), max_gradnorm)
 	optimizer.step()
 
 	i_batch+=1
