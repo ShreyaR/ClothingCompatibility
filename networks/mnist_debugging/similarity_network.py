@@ -12,6 +12,8 @@ class Net(torch.nn.Module):
 		self.network = alexnet(pretrained=pretrained)
 		self.network.classifier = nn.Sequential(*(self.network.classifier[i] for i in range(6)))
 		self.network.classifier.add_module('6', nn.Linear(4096, primaryEmbeddingSize))
+		#self.network.features[0] = nn.Conv2d(1, 64, kernel_size=(11, 11), stride=(4, 4), padding=(2, 2))
+		self.network.temp = nn.Sequential([nn.Conv2d(1, 64, kernel_size=(11, 11), stride=(4, 4), padding=(2, 2)), self.network.features[1]])
 	
 	def forward_once(self, x):
 		"""
