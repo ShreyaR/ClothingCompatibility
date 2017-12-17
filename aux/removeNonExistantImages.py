@@ -4,6 +4,10 @@ tr = ManageTrie()
 
 def findUniqueImages():
 	out = open('/data/srajpal2/AmazonDataset/similarity_training/uniqImages.txt', 'w')
+	
+	
+
+
 	with open('/data/srajpal2/AmazonDataset/similarity_training/similarity_training_pairs.txt') as f:
 		count = 0
 		prev_time = time()

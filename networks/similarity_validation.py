@@ -25,7 +25,7 @@ class validation:
 		# Load saved network
 		checkpoint = torch.load(checkpoint, map_location=lambda storage, loc: storage.cuda(0))
 		self.net.load_state_dict(checkpoint['state_dict'])
-		self.criterion = ContrastiveLoss()
+		self.criterion = torch.nn.TripletMarginLoss()
 		loss = self.validation_loss()
 		if prev_checkpoint!='None':
 			prev_loss = pickle.load(open('/'.join(checkpoint_path.split('/')[:-2] + ['prev_loss.p']), 'rb'))
@@ -49,13 +49,13 @@ class validation:
 	        	
         		im1 = example['im1']
         		im2 = example['im2']
-        		label = example['label']
+        		im3 = example['im3']
 
-        		im1, im2 , label = Variable(im1).cuda(), Variable(im2).cuda() , Variable(label.float()).cuda()
-			output1,output2 = self.net(im1,im2)
-       			loss_contrastive = self.criterion(output1,output2,label)
+        		im1, im2 , im3 = Variable(im1).cuda(), Variable(im2).cuda() , Variable(im3).cuda()
+			output1,output2,output3 = self.net(im1,im2,im3)
+       			loss_triplet = self.criterion(output1,output2,label)
 			
-			losses.append(loss_contrastive.data[0])
+			losses.append(loss_triplet.data[0])
 
 
 		avg_loss = float(sum(losses))/len(losses)

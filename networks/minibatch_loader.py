@@ -23,9 +23,10 @@ class batched_dataset(Dataset):
 		im1 = stack([x for x in im1 if x.size()==(3, self.imageSize, self.imageSize)], 0)
 		im2 = df[1].apply(Image.open).apply(self.transform)
 		im2 = stack([x for x in im2 if x.size()==(3, self.imageSize, self.imageSize)], 0)
-		label = torch.from_numpy(df[2].values)
+		im3 = df[2].apply(Image.open).apply(self.transform)
+		im3 = stack([x for x in im2 if x.size()==(3, self.imageSize, self.imageSize)], 0)
 		
-		sample = {'im1': im1, 'im2':im2, 'label':label}
+		sample = {'im1': im1, 'im2':im2, 'im3':im3}
 		return sample
 
 	def __len__(self):
@@ -45,7 +46,7 @@ class dataset(Dataset):
 
 		im1 = self.transform(Image.open(self.df[0][idx]))
 		im2 = self.transform(Image.open(self.df[1][idx]))
-		label = float(self.df[2][idx])
-		sample = {'im1': im1, 'im2':im2, 'label':label}
+		im3 = self.transform(Image.open(self.df[2][idx]))
+		sample = {'im1': im1, 'im2':im2, 'im3':im3}
 		return sample
 		

@@ -123,3 +123,4 @@ class triplet_creation:
 # print "\n\nValidation Pairs"
 # x3 = pair_creation('val', 0, 1)
 triplet_creation('training', True, 10)
+triplet_creation('val', True, 10)
