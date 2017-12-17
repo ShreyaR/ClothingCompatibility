@@ -21,21 +21,20 @@ def data_preprocess(file_name, rogue_images):
 		init_time = time()
 		for line in f:
 			count += 1
-			if count==1000:
+			if count%1000==0:
 				print count, time()-init_time
 			info = json.loads(line.rstrip())
-			url = info["imUrl"]
+			url = imgUrlTransform(info["imUrl"])
 			if url in rogue:
 				continue
 			if url.split('.')[-1] == 'gif':
 				continue
 			info["imUrl"] = url
+			print info
 			json.dump(info, outfile)
-
+			outfile.write('\n')
 	os.system("mv temp.txt %s" % (file_name))
 	return
-
-
 
 def imgUrlTransform(url):
 	"""
@@ -44,3 +43,7 @@ def imgUrlTransform(url):
 	url = url.split('/')
 	url[3] = url[3] + 'set'
 	return '/'.join(url)
+
+data_preprocess('/data/srajpal2/AmazonDataset/training_images.json', '/data/srajpal2/AmazonDataset/similarity_training/rogueImages_Size.txt')
+#data_preprocess('/data/srajpal2/AmazonDataset/testing_images.json', '/data/srajpal2/AmazonDataset/similarity_training/rogueImages_Size.txt')
+#data_preprocess('/data/srajpal2/AmazonDataset/val_images.json', '/data/srajpal2/AmazonDataset/similarity_training/rogueImages_Size.txt')

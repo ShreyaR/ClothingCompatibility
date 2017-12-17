@@ -8,7 +8,7 @@ class triplet_creation:
 	Creates triplets, where an anchor point has just one positive and one negative example.
 	"""
 
-	def __init__(self, type_of_data, similarity, support, training_stage):
+	def __init__(self, type_of_data, similarity, support):
 		"""
 		Arguments:
 		typle_of_data: train, test, val.
@@ -45,6 +45,7 @@ class triplet_creation:
 		self.count = 0
 		
 		self.initial_data_pass()
+		print "Done with the initial pass."
 		self.create_triplets()
 		print self.count, self.no_links
 		
@@ -57,6 +58,7 @@ class triplet_creation:
 		# inverse_cat = {'t': ['b', 's'], 'b': ['t', 's'], 's': ['b', 't']}
 
 		with open("/data/srajpal2/AmazonDataset/%s_images.json" % self.type_of_data) as f:
+			count = 0
 			for line in f:
 				info = json.loads(line.rstrip())
 				self.asin_to_cat[info["asin"]] = info["category"]
@@ -72,49 +74,37 @@ class triplet_creation:
 		"""
 		Passes through json of all images, and for each line creates triplets.
 		"""
-
-		with open("/data/srajpal2/AmazonDataset/%s_images.json" % self.type_of_data) as f:
-			init_time = time()
-			for line in f:
-				info = json.loads(line.rstrip())
-				asin, img, related, cat = info["asin"], info["imUrl"], info["related"], info["category"]
-				self.createPositiveNegativeExamples(asin, self.imgUrlTransform(img), related, cat)
-				self.count += 1
-				if self.count==1000:
-					print self.count, time()-init_time
-
-	def createPositiveNegativeExamples(self, asin, img, related, category):
-		"""
-		asin, img, related, category: all attributes of the line. img refers to im_url
-		"""
 		
-		if len(related[self.objective_stemmed])==0:
-			self.no_links += 1
-			return
-
 		for i in xrange(self.support):
-			# Positive Example (from related category of anchor img)
-			asin2 = choice(related[self.objective_stemmed])
-			img2 = self.imgUrlTransform(self.asin_to_url[asin2])
-			# Negative Example (could be from all 3 categories.)
-			asin3 = choice(self.asin_list)
-			img3 = self.imgUrlTransform(self.asin_to_url[asin3])
-			self.outfile.write("%s %s %s\n" % (img, img2, img3))
+			self.count = 0
+			self.no_links = 0
+			self.randlist = range(0, len(self.asin_list))
+			shuffle(self.randlist)
+			with open("/data/srajpal2/AmazonDataset/%s_images.json" % self.type_of_data) as f:
+				init_time = time()
+				for line in f:
+					info = json.loads(line.rstrip())
+					asin, img, related, cat = info["asin"], info["imUrl"], info["related"], info["category"]
+					
+	                		if len(related[self.objective_stemmed])==0:
+        	                		self.no_links += 1
+                			
+                			else:
+                        			# Positive Example (from related category of anchor img)
+                        			asin2 = choice(related[self.objective_stemmed])
+                	       			img2 = self.asin_to_url[asin2]
 
+		                        	# Negative Example (could be from all 3 categories.)
+				                asin3 = self.asin_list[self.randlist[self.count]]
+                      				img3 = self.asin_to_url[asin3]
+			                        
+						self.outfile.write("%s %s %s\n" % (img, img2, img3))
+
+					self.count += 1
+					if self.count%1000==0:
+						print self.count, time()-init_time
+		
 		return
-
-	def sampleChoice(self, n, k, collision_set):
-
-		sampled_items = set()
-
-		for i in xrange(k):
-			while(True):
-				x = choice(range(n))
-				if x not in collision_set and x not in sampled_items:
-					sampled_items.add(x)
-					break
-
-		return list(sampled_items)
 
 
 	def imgUrlTransform(self, url):
@@ -132,3 +122,4 @@ class triplet_creation:
 #x2 = pair_creation('testing', 1, 0)
 # print "\n\nValidation Pairs"
 # x3 = pair_creation('val', 0, 1)
+triplet_creation('training', True, 10)
