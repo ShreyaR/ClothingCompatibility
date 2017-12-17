@@ -57,7 +57,7 @@ class triplet_creation:
 		"""
 		# inverse_cat = {'t': ['b', 's'], 'b': ['t', 's'], 's': ['b', 't']}
 
-		with open("/data/srajpal2/AmazonDataset/%s_images.json" % self.type_of_data) as f:
+		with open("/data/srajpal2/AmazonDataset/GoldStandard/%s_images.json" % self.type_of_data) as f:
 			count = 0
 			for line in f:
 				info = json.loads(line.rstrip())
@@ -80,7 +80,7 @@ class triplet_creation:
 			self.no_links = 0
 			self.randlist = range(0, len(self.asin_list))
 			shuffle(self.randlist)
-			with open("/data/srajpal2/AmazonDataset/%s_images.json" % self.type_of_data) as f:
+			with open("/data/srajpal2/AmazonDataset/GoldStandard/%s_images.json" % self.type_of_data) as f:
 				init_time = time()
 				for line in f:
 					info = json.loads(line.rstrip())
@@ -122,5 +122,5 @@ class triplet_creation:
 #x2 = pair_creation('testing', 1, 0)
 # print "\n\nValidation Pairs"
 # x3 = pair_creation('val', 0, 1)
-triplet_creation('training', True, 10)
+#triplet_creation('training', True, 10)
 triplet_creation('val', True, 10)

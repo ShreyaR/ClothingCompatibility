@@ -17,15 +17,16 @@ class Net(torch.nn.Module):
 		"""
 		Takes as input a 3*224*224 image, returns an embedding of length primaryEmbeddingSize.
 		"""
-		#x = F.normalize(self.network(x), p=2)
-		x = self.network(x)
+		x = F.normalize(self.network(x), p=2)
+		#x = self.network(x)
 		return x
 
 	def forward(self, image1, image2, image3):
 		"""
 		Returns pair of embeddings for pair of training images.
 		"""
-		output1 = self.forward_once(image1)
-		output2 = self.forward_once(image2)
-		output3 = self.forward_once(image3)
+
+		input_cat = torch.cat((image1, image2, image3), dim=0)
+		output_cat = self.forward_once(input_cat)
+		output1, output2, output3 = torch.chunk(output_cat, 3, dim=0)
 		return output1, output2, output3

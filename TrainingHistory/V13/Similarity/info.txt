@@ -1,0 +1,5 @@
+Learning Rate: 0.001000
+Primary Embedding Dimension: 256
+Margin: 0.500000
+Optimizer: RMS
+Minibatch Size: 64

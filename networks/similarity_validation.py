@@ -1,6 +1,6 @@
 import torch
 from torch import optim
-from hinge_loss import ContrastiveLoss
+#from hinge_loss import ContrastiveLoss
 from minibatch_loader import dataset
 from torch.autograd import Variable
 from similarity_network import Net
@@ -10,11 +10,11 @@ from torch.utils.data import DataLoader
 import cPickle as pickle
 import os
 
-os.environ["CUDA_VISIBLE_DEVICES"]="1"
+os.environ["CUDA_VISIBLE_DEVICES"]="2"
 
 class validation:
 
-	def __init__(self, checkpoint, validation_data, valloss_file, image_size, primary_embedding_dim, iteration_num, prev_checkpoint):
+	def __init__(self, checkpoint, validation_data, valloss_file, image_size, primary_embedding_dim, iteration_num, prev_checkpoint, margin):
 		self.validation_data = validation_data
 		self.valloss_file = valloss_file
 		self.image_size = image_size
@@ -25,7 +25,7 @@ class validation:
 		# Load saved network
 		checkpoint = torch.load(checkpoint, map_location=lambda storage, loc: storage.cuda(0))
 		self.net.load_state_dict(checkpoint['state_dict'])
-		self.criterion = torch.nn.TripletMarginLoss()
+		self.criterion = torch.nn.TripletMarginLoss(margin=margin)
 		loss = self.validation_loss()
 		if prev_checkpoint!='None':
 			prev_loss = pickle.load(open('/'.join(checkpoint_path.split('/')[:-2] + ['prev_loss.p']), 'rb'))
@@ -53,7 +53,7 @@ class validation:
 
         		im1, im2 , im3 = Variable(im1).cuda(), Variable(im2).cuda() , Variable(im3).cuda()
 			output1,output2,output3 = self.net(im1,im2,im3)
-       			loss_triplet = self.criterion(output1,output2,label)
+       			loss_triplet = self.criterion(output1,output2,output3)
 			
 			losses.append(loss_triplet.data[0])
 
@@ -64,6 +64,6 @@ class validation:
         	print "Validation Completed!"
 		return avg_loss
 
-validation(sys.argv[1], sys.argv[2], sys.argv[3], int(sys.argv[4]), int(sys.argv[5]), int(sys.argv[6]), sys.argv[7])
+validation(sys.argv[1], sys.argv[2], sys.argv[3], int(sys.argv[4]), int(sys.argv[5]), int(sys.argv[6]), sys.argv[7], float(sys.argv[8]))
 
 

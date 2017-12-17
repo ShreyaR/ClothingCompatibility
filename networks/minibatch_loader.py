@@ -18,15 +18,26 @@ class batched_dataset(Dataset):
 
 	def __getitem__(self, idx):
 		# return self.load_file(self.data_files[idx])
-		df = pd.read_csv(self.root + self.data_files[idx], delim_whitespace=True, header=None)
-		im1 = df[0].apply(Image.open).apply(self.transform)
-		im1 = stack([x for x in im1 if x.size()==(3, self.imageSize, self.imageSize)], 0)
-		im2 = df[1].apply(Image.open).apply(self.transform)
-		im2 = stack([x for x in im2 if x.size()==(3, self.imageSize, self.imageSize)], 0)
-		im3 = df[2].apply(Image.open).apply(self.transform)
-		im3 = stack([x for x in im2 if x.size()==(3, self.imageSize, self.imageSize)], 0)
-		
-		sample = {'im1': im1, 'im2':im2, 'im3':im3}
+                df = pd.read_csv(self.root + self.data_files[idx], delim_whitespace=True, header=None)
+                im1 = df[0].apply(Image.open).apply(self.transform)
+                im1 = stack([x for x in im1 if x.size()==(3, self.imageSize, self.imageSize)], 0)
+                im2 = df[1].apply(Image.open).apply(self.transform)
+                im2 = stack([x for x in im2 if x.size()==(3, self.imageSize, self.imageSize)], 0)
+                im3 = df[2].apply(Image.open).apply(self.transform)
+                im3 = stack([x for x in im3 if x.size()==(3, self.imageSize, self.imageSize)], 0)
+                sample = {'im1': im1, 'im2':im2, 'im3':im3}
+
+		"""try:
+			df = pd.read_csv(self.root + self.data_files[idx], delim_whitespace=True, header=None)
+			im1 = df[0].apply(Image.open).apply(self.transform)
+			im1 = stack([x for x in im1 if x.size()==(3, self.imageSize, self.imageSize)], 0)
+			im2 = df[1].apply(Image.open).apply(self.transform)
+			im2 = stack([x for x in im2 if x.size()==(3, self.imageSize, self.imageSize)], 0)
+			im3 = df[2].apply(Image.open).apply(self.transform)
+			im3 = stack([x for x in im3 if x.size()==(3, self.imageSize, self.imageSize)], 0)
+			sample = {'im1': im1, 'im2':im2, 'im3':im3}
+		except IOError:
+			sample = {}"""
 		return sample
 
 	def __len__(self):
