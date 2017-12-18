@@ -14,6 +14,8 @@ from trie import ManageTrie
 tr = ManageTrie()
 
 def data_preprocess(file_name, rogue_images, corrupted_images, AddSuffix=False, RemoveSuffix=False):
+	
+
 	with open(rogue_images) as f:
 		rogue = f.readlines()
 	with open(corrupted_images) as f:

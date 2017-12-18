@@ -10,7 +10,7 @@ from torch.utils.data import DataLoader
 import cPickle as pickle
 import os
 
-os.environ["CUDA_VISIBLE_DEVICES"]="2"
+os.environ["CUDA_VISIBLE_DEVICES"]=sys.argv[9]
 
 class validation:
 
