@@ -7,7 +7,7 @@ from PIL import Image
 def create_tsne(loc_file, images_file):
 	embeddings = np.load(loc_file)
 	with open(images_file) as f:
-		images = ['/'.join(x.rstrip().split('/')[-2:]) for x in f.readlines()]
+		images = ['/'.join(x.rstrip().split('/')[-3:]) for x in f.readlines()]
 
 	# print embeddings.shape, len(images), images[0]
 
@@ -67,4 +67,4 @@ def create_tsne(loc_file, images_file):
 	return artists
 
 
-create_tsne("tsne_locs.npy", "tsne_imgs.txt")
+create_tsne("Testing/tsne_locs.npy", "Testing/tsne_imgs.txt")

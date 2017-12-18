@@ -6,3 +6,9 @@ model_checkpoint.pth
 TSNE/Images/
 TSNE/similarity_tsne.eps
 TSNE/Images.zip
+TSNE/Testing/Images.zip
+TSNE/Testing/Images/
+TSNE/Training/Images.zip
+TSNE/Training/Images/
+TSNE/Training/similarity_tsne.eps
+
