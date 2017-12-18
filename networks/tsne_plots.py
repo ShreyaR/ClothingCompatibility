@@ -28,47 +28,24 @@ class GeneratePlots:
 			self.tsne_dir = self.preprocess(f)
 		else:
 			self.tsne_dir = f
-
+		
                 self.net = Net(primary_embedding_dim, pretrained=False).cuda()
                 self.net.eval()
                 checkpoint = torch.load(checkpoint, map_location=lambda storage, loc: storage.cuda(0))
                 self.net.load_state_dict(checkpoint['state_dict'])
 		
 		self.compute_embeddings(227)
-		#self.dimensionality_reduction(5)
-		#np.save("../TSNE/tsne_locs.npy", self.embedding_2D)
-		
-		#with open("../TSNE/tsne_imgs.txt","w") as f:
-		#	for img in self.images:
-		#		new_img = '~/Dropbox/V1_VGG/ClothingCompatibility/TSNE/Images/' + img.split('/')[-1]
-  		#		f.write("%s\n" % new_img)
-
-		for i in self.images:
-			os.system("scp %s /data/srajpal2/AmazonDataset/tsne/Images/" % (i))
+		"""self.dimensionality_reduction(5)
+		np.save("../TSNE/Testing/tsne_locs.npy", self.embedding_2D)
 			
-		
-		#self.create_tsne()
-
-		"""def create_tsne(self):
-    		fig, ax = plt.subplots()
-    		#ax.plot(x, y)
-    		
-    		artists = []
-    		for loc,image in zip(self.embeddings_2D, self.images):
-			print loc, loc[0], loc[1], image
-			continue
-            		try:
-                        	image = plt.imread(image)
-                	except TypeError:
-                        	# Likely already an array...
-                        	pass
-			im = OffsetImage(image, zoom=0.1)
-        		ab = AnnotationBbox(im, (loc[0], loc[1]), xycoords='data', frameon=False)
-        		artists.append(ax.add_artist(ab))
-    		ax.update_datalim(np.column_stack([x, y]))
-    		ax.autoscale()
-		plt.save()
-    		return artists"""
+		with open("../TSNE/Testing/tsne_imgs.txt","w") as f:
+			for img in self.images:
+				new_img = 'Testing/Images/' + img.split('/')[-1]
+  				f.write("%s\n" % new_img)
+		"""
+		for i in self.images:
+			print "scp %s /data/srajpal2/AmazonDataset/tsne/Testing/Images/" % (i)
+			os.system("scp %s /data/srajpal2/AmazonDataset/tsne/Testing/Images/" % (i))
 
 
 	def compute_embeddings(self, imageSize):
@@ -139,4 +116,4 @@ class GeneratePlots:
 		os.system("split -l 64 -d %s %s" % (tsne_outfile, tsne_dir))
 		return tsne_dir
 		
-GeneratePlots('/data/srajpal2/AmazonDataset/tsne/minibatches/', False, 256, '/data/srajpal2/AmazonDataset/tsne/V13.pth') 
+GeneratePlots('/data/srajpal2/AmazonDataset/tsne/Testing/minibatches/', False, 256, '/data/srajpal2/AmazonDataset/tsne/V13.pth') 
