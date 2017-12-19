@@ -53,6 +53,30 @@ class LearningRatePlot:
 		ax.set_xscale('log')
 		plt.show()
 
+
+class TrainingValHistory:
+
+	def __init__(self, versions):
+		for v in versions:
+			info = self.getInfo(v)
+			training_iter, training_loss = self.readTrainingLoss(v)
+			
+			
+
+	def getInfo(self, v):
+		with open("V%d/Similarity/info.txt") as f:
+			info = [x.rstrip().split(': ') for x in f.readlines()]
+		return info[3]
+
+	def readTrainingLoss(self):
+		info = []
+		with open("V%d/Similarity/training_loss.txt") as f:
+			for line in f:
+					
+
+
+
+	
 		
 
 LearningRatePlot(range(16, 16+28))
