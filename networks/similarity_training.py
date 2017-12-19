@@ -31,7 +31,7 @@ gpu_validation = sys.argv[6]
 
 minibatch_size = 64
 training_datadir = '/data/srajpal2/AmazonDataset/Triplets/similarity_training/Training/'
-validation_data = '/data/srajpal2/AmazonDataset/Triplets/similarity_training/val_triplets.txt'
+validation_data = '/data/srajpal2/AmazonDataset/Triplets/similarity_training/val_triplets_support_10.txt'
 validation_evaluation_frequency = 200
 
 if not os.path.isdir('/data/srajpal2/AmazonDataset/Checkpoints/V%d/Similarity' % version):
