@@ -1,15 +1,15 @@
 import os
 
 #versions = range(37,37+len(lr))
-versions = [3,4]
-opt = ['SGD']
-learning_rate = [0.1]
+versions = [10]
+opt = ['SGD', 'Adam']
+learning_rate = [0.1, 0.0001]
 
 for optim,lr in zip(opt, learning_rate):
 	for version_num in versions:
 	
 		print "\nStarting %s version %d\n############################\n" % (optim, version_num)
-		os.system("python similarity_training_and_val.py %d %f 2000 %s 1" % (version_num, lr, optim))
+		os.system("python similarity_training_and_val.py %d %f 2000 %s 0" % (version_num, lr, optim))
 
 
 #versions = [10, 1, 10]
