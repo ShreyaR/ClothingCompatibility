@@ -28,19 +28,20 @@ minibatch_size = 64
 #####################################
 #Logs
 
-valtrainingloss_file = '../TrainingHistory/TrainTestGaps/%s/val_training_loss_V%d.txt' % (opt, version)
-info_file = '../TrainingHistory/TrainTestGaps/%s/info.txt' % (opt)
+valtrainingloss_file = '../TrainingHistory/RandomTrainTestGaps/%s/val_training_loss_V%d.txt' % (opt, version)
+info_file = '../TrainingHistory/RandomTrainTestGaps/%s/info.txt' % (opt)
 
-if not os.path.isdir('../TrainingHistory/TrainTestGaps/%s/' % opt):
-	os.makedirs('../TrainingHistory/TrainTestGaps/%s/' % opt)
+if not os.path.isdir('../TrainingHistory/RandomTrainTestGaps/%s/' % opt):
+	os.makedirs('../TrainingHistory/RandomTrainTestGaps/%s/' % opt)
 
 with open(info_file, 'w') as f:
 	f.write("Learning Rate: %f\nPrimary Embedding Dimension: %d\nMargin: %f\nOptimizer: %s\nMinibatch Size: %d" % (learning_rate, primary_embedding_dim, margin, opt, minibatch_size))
 
 val_training_history = open(valtrainingloss_file, 'w')
 
-training_datadir = '/data/srajpal2/AmazonDataset/Triplets/similarity_training/Training/'
-validation_data = '/data/srajpal2/AmazonDataset/Triplets/similarity_training/val_triplets.txt'
+#Shuffle training and validation data
+training_datadir = '/data/srajpal2/AmazonDataset/Triplets/similarity_training/Sampling/Training_V%d/' % (version)
+validation_data = '/data/srajpal2/AmazonDataset/Triplets/similarity_training/Sampling/val_triplets_V%d.txt' % (version)
 
 
 #####################################
