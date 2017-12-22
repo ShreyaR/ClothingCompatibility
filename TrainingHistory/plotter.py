@@ -81,7 +81,7 @@ class GeneralPurposePlotter:
 			ax.legend(handles=lines.values())
 			lines = {}
 		# ax.set_xscale('log')
-		plt.suptitle('Training and Validation History for various Optimization Algorithms')
+		plt.suptitle('Training and Test Error for SGD, Adam, Adagrad, RMSprop')
 		plt.show()
 
 
@@ -104,7 +104,7 @@ class TrainingValHistory:
 			val_hist = self.readValHist(v)
 			training_hist_dict[info] = training_hist
 			val_history_dict[info] = val_hist
-		GeneralPurposePlotter(training_hist_dict.keys(), training_hist_dict, val_history_dict, training_history_smoothing=50)
+		GeneralPurposePlotter(training_hist_dict.keys(), training_hist_dict, val_history_dict, training_history_smoothing=200)
 
 	def getInfo(self, v):
 		with open("V%d/Similarity/info.txt" % v) as f:
@@ -116,7 +116,11 @@ class TrainingValHistory:
 		with open("V%d/Similarity/training_loss.txt" % v) as f:
 			for line in f:
 				iteratn, loss = line.rstrip().split(', ')[:2]
-				info.append([int(iteratn), float(loss)])
+				
+				try:
+					info.append([int(iteratn.split(": ")[1]), float(loss.split(": ")[1])])
+				except IndexError:
+					info.append([int(iteratn), float(loss)])
 		return info
 
 	def readValHist(self,v):
@@ -139,7 +143,7 @@ class TrainValDiffPlot:
 		mean1, var1 = np.mean(train,axis=1), np.var(train, axis=1)
 		mean2, var2 = np.mean(val,axis=1), np.var(val, axis=1)
 
-		mean_array = mean1 - mean2
+		mean_array = mean2 - mean1
 		sigma_array = np.sqrt((var1 + var2)/self.num_samples)
 
 		lower, upper = mean_array-(t*sigma_array), mean_array+(t*sigma_array)
@@ -175,14 +179,18 @@ class TrainValDiffPlot:
 		lines["Train"] ,= ax.plot(x_ticks[moving_average:], self.running_mean(mean_train, moving_average), label="Mean Training Loss")
 		lines["Test"] ,= ax.plot(x_ticks[moving_average:], self.running_mean(mean_val, moving_average), label="Mean Testing Loss")
 		ax.legend(handles=lines.values())
+		ax.set_title("Mean Training and Test loss (10 trials)")
+		ax.set_ylim([0.1, 0.3])
 		lines = {}
 
 		ax = fig.add_subplot(1,2,2)
-		lines["Mean"] ,= ax.plot(x_ticks[moving_average:], self.running_mean(mean, moving_average), label="Testing Gap: Mean")
-		lines["Lower"] ,= ax.plot(x_ticks[moving_average:], self.running_mean(lower, moving_average), label="Testing Gap: Lower")
-		lines["Upper"] ,= ax.plot(x_ticks[moving_average:], self.running_mean(upper, moving_average), label="Testing Gap: Upper", color=lines["Lower"].get_color())
+		lines["Mean"] ,= ax.plot(x_ticks[moving_average:], self.running_mean(mean, moving_average))
+		lines["Lower"] ,= ax.plot(x_ticks[moving_average:], self.running_mean(lower, moving_average), label="95% confidence interval")
+		lines["Upper"] ,= ax.plot(x_ticks[moving_average:], self.running_mean(upper, moving_average), color=lines["Lower"].get_color())
 		ax.fill_between(x_ticks[moving_average:], self.running_mean(lower, moving_average), self.running_mean(upper, moving_average), color=lines["Lower"].get_color(), alpha=0.5)
 		ax.legend(handles=lines.values())
+		ax.set_title("Mean difference in Training and Test loss.")
+		ax.set_ylim([-0.04, 0.04])
 		plt.show()
 		return
 
@@ -203,7 +211,7 @@ class GapDiffPlot:
 		self.num_samples = num_samples
 
 		gaps1 = self.get_gap_matrix(opt1)
-		gaps2 = self.get_gap_matrix(opt1)
+		gaps2 = self.get_gap_matrix(opt2)
 
 		mean1, var1 = np.mean(gaps1,axis=1), np.var(gaps1, axis=1)
 		mean2, var2 = np.mean(gaps2,axis=1), np.var(gaps2, axis=1)
@@ -212,7 +220,7 @@ class GapDiffPlot:
 		sigma_array = np.sqrt((var1 + var2)/self.num_samples)
 
 		lower, upper = mean_array-(t*sigma_array), mean_array+(t*sigma_array)
-		self.plot_confidence_bounds(mean_array, lower, upper, mean1, mean2, 50)
+		self.plot_confidence_bounds(mean_array, lower, upper, mean1, mean2, 100)
 
 
 	def get_gap_matrix(self, optim):
@@ -239,16 +247,22 @@ class GapDiffPlot:
 		
 		# Left subplot for comparison
 		ax = fig.add_subplot(1,2,1)
-		lines["Gaps1"] ,= ax.plot(x_ticks[moving_average:], self.running_mean(mean_train, moving_average), label="Testing Gaps 2")
-		lines["Gaps2"] ,= ax.plot(x_ticks[moving_average:], self.running_mean(mean_val, moving_average), label="Testing Gaps 2")
+		lines["Gaps1"] ,= ax.plot(x_ticks[moving_average:], self.running_mean(mean_train, moving_average), label="Adam")
+		lines["Gaps2"] ,= ax.plot(x_ticks[moving_average:], self.running_mean(mean_val, moving_average), label="Adam")
 		ax.legend(handles=lines.values())
+		ax.set_title("Mean values of Training and Test gaps (10 trials)")
+		# ax.set_ylim([0.12, 0.28])
+		
 		lines = {}
 
 		ax = fig.add_subplot(1,2,2)
-		lines["Mean"] ,= ax.plot(x_ticks[moving_average:], self.running_mean(mean, moving_average), label="Testing Gap: Mean")
-		lines["Lower"] ,= ax.plot(x_ticks[moving_average:], self.running_mean(lower, moving_average), label="Testing Gap: Lower")
-		lines["Upper"] ,= ax.plot(x_ticks[moving_average:], self.running_mean(upper, moving_average), label="Testing Gap: Upper")
+		lines["Mean"] ,= ax.plot(x_ticks[moving_average:], self.running_mean(mean, moving_average))
+		lines["Lower"] ,= ax.plot(x_ticks[moving_average:], self.running_mean(lower, moving_average), label="95% Confidence Interval")
+		lines["Upper"] ,= ax.plot(x_ticks[moving_average:], self.running_mean(upper, moving_average), color=lines["Lower"].get_color())
+		ax.fill_between(x_ticks[moving_average:], self.running_mean(lower, moving_average), self.running_mean(upper, moving_average), color=lines["Lower"].get_color(), alpha=0.5)
 		ax.legend(handles=lines.values())
+		ax.set_title("Mean difference between Adam and SGD gaps.")
+		# ax.set_ylim([-0.04, 0.04])
 		plt.show()
 		return
 
@@ -262,10 +276,12 @@ class GapDiffPlot:
 
 
 
-TrainValDiffPlot("SGD", 2.306, 5)
+# TrainValDiffPlot("SGD", 2.101, 10)
+GapDiffPlot("Adam", "SGD", 2.101, 10)
 
 
 
 
 # LearningRatePlot(range(16, 16+28))
 # TrainingValHistory([18,25,33,42])
+# TrainingValHistory([6, 13, 14, 15])

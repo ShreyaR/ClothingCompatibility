@@ -37,8 +37,8 @@ def create_tsne(loc_file, images_file):
 		# im = OffsetImage(image)
 		# ab = AnnotationBbox(im, (loc[0], loc[1]), xycoords='data', frameon=False)
 		# print loc[1], loc[0]
-		loc = loc*100
-		# print (loc[0], loc[0]+150, loc[1], loc[1]+150)
+		loc = loc*80
+		# print (loc[0], loc[0]+300, loc[1], loc[1]+300)
 		plt.imshow(image, extent=(loc[0], loc[0]+150, loc[1], loc[1]+150))
 
 		if loc[0]-500 < x_min:
