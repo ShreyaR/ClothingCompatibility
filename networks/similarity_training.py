@@ -44,7 +44,7 @@ with open(info_file, 'w') as f:
 
 
 os.environ["CUDA_VISIBLE_DEVICES"]=gpu_training
-net = Net(primary_embedding_dim, pretrained=False).cuda()
+net = Net(primary_embedding_dim, pretrained=True).cuda()
 net.train()
 #criterion = ContrastiveLoss()
 criterion = torch.nn.TripletMarginLoss(margin=margin)
