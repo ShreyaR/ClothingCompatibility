@@ -16,7 +16,11 @@ class FindLinksDensityDistribution:
 		
 		for line in self.f:
 			info = json.loads(line.rstrip())
-			print info["related"], type(info["related"])
-			break
+			anchor_asin = info["asin"]
 
-FindLinksDensityDistribution()
+			for asins in info["related"]["compatible"]:
+				
+	
+
+
+FindLinksDensityDistribution("/data/srajpal2/AmazonDataset/GoldStandard/training_images.json")
